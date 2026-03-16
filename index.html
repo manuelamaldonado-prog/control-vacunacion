@@ -1,0 +1,2335 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8">
+  <title>Control de Vacunación</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="styles.css?v=8">
+</head>
+
+<body>
+  <div class="app">
+    <header class="app-header">
+      <h1>Control de Vacunación</h1>
+    </header>
+    <main class="app-main">
+      <nav class="app-nav">
+        <button type="button" class="nav-button active" data-section="proveedores">Proveedores</button>
+        <button type="button" class="nav-button" data-section="clientes">Clientes</button>
+        <button type="button" class="nav-button" data-section="vacunadores">Vacunadores</button>
+        <button type="button" class="nav-button" data-section="vacunacion">Vacunación</button>
+        <button type="button" class="nav-button" data-section="cobro">Cobro</button>
+        <button type="button" class="nav-button" data-section="pagos">Pagos</button>
+        <button type="button" class="nav-button" data-section="precios">Precio de vacuna</button>
+        <button type="button" class="nav-button" data-section="actas-entrega">Actas de Entrega</button>
+        <button type="button" class="nav-button" data-section="actas-recepcion">Actas de Recepción</button>
+        <button type="button" class="nav-button" data-section="informes">Informes</button>
+        <button type="button" class="nav-button" data-section="finanzas">Finanzas</button>
+        <button type="button" class="nav-button" data-section="backup">Backup</button>
+      </nav>
+      <section class="card section" data-section="proveedores">
+        <h2>Proveedores</h2>
+        <form id="form-proveedor" class="form form-proveedor-compacta">
+          <div class="form-row form-proveedor-inline">
+            <div>
+              <label for="prov-razon-social">Razón social</label>
+              <input id="prov-razon-social" name="razonSocial" type="text" required>
+            </div>
+            <div>
+              <label for="prov-direccion">Dirección</label>
+              <input id="prov-direccion" name="direccion" type="text">
+            </div>
+            <div>
+              <label for="prov-cuit">N° de CUIT</label>
+              <input id="prov-cuit" name="cuit" type="text">
+            </div>
+            <div>
+              <label for="prov-tipo-inscripcion">Tipo de inscripción AFIP</label>
+              <select id="prov-tipo-inscripcion" name="tipoInscripcion">
+                <option value="">Seleccionar</option>
+                <option value="Monotributo">Monotributo</option>
+                <option value="Responsable Inscripto">Responsable Inscripto</option>
+                <option value="Exento">Exento</option>
+                <option value="Consumidor Final">Consumidor Final</option>
+                <option value="Otro">Otro</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" id="btn-submit-proveedor">Guardar proveedor</button>
+            <button type="button" id="btn-cancelar-edicion-prov" class="secondary hidden">Cancelar edición</button>
+          </div>
+        </form>
+        <div class="dropdown">
+          <div id="lista-proveedores" class="dropdown-panel hidden"></div>
+        </div>
+        <div class="table-wrapper">
+          <h3>Listado de proveedores</h3>
+          <table class="table" id="tabla-proveedores">
+            <thead>
+              <tr>
+                <th>Razón social</th>
+                <th>Dosis compradas</th>
+                <th>Dosis recepcionadas</th>
+                <th>Saldo en el proveedor</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="tbody-proveedores"></tbody>
+          </table>
+        </div>
+        <div class="table-wrapper">
+          <h4>Resumen por vacuna</h4>
+          <table class="table" id="tabla-saldos-vacunas">
+            <thead>
+              <tr>
+                <th>Vacuna</th>
+                <th>Dosis compradas</th>
+                <th>Dosis recepcionadas</th>
+                <th>Saldo en el proveedor</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <div class="table-wrapper">
+          <h3>Por tipo de vacuna (todos los laboratorios)</h3>
+          <div id="panel-vacunas-der"></div>
+        </div>
+        <div class="movimientos-bloque">
+          <div class="table-wrapper" style="margin-bottom: 30px; border-bottom: 2px solid #eee; padding-bottom: 20px;">
+            <h4>Historial (todas las compras y recepciones)</h4>
+            <table class="table" id="tabla-historial">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Laboratorio</th>
+                  <th>Tipo de vacuna</th>
+                  <th>Marca</th>
+                  <th>Serie/Lote</th>
+                  <th>Fecha de venc.</th>
+                  <th class="col-cant">Cantidad</th>
+                  <th>Tipo</th>
+                  <th>Factura/Remito</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+
+          <h3>Movimientos del proveedor</h3>
+          <p id="texto-sin-proveedor" class="helper-text">
+            Seleccioná un proveedor con el botón Proveedor para registrar compras y recepciones.
+          </p>
+          <p id="proveedor-actual" class="proveedor-actual hidden">
+            Proveedor seleccionado: <strong id="proveedor-actual-nombre"></strong>
+          </p>
+          <div class="grid-2 movimientos-formularios">
+            <div>
+              <h4>Registrar compra</h4>
+              <form id="form-compra" class="form">
+                <div class="form-row">
+                  <button type="button" id="btn-proveedor-compra" class="secondary">Proveedor</button>
+                </div>
+                <div class="dropdown">
+                  <div id="lista-proveedores-compra" class="dropdown-panel hidden"></div>
+                </div>
+                <div class="form-row">
+                  <label for="compra-fecha">Fecha</label>
+                  <input id="compra-fecha" name="fecha" type="date" required>
+                </div>
+                <div class="form-row">
+                  <label for="compra-factura">N° factura</label>
+                  <input id="compra-factura" name="factura" type="text" required>
+                </div>
+                <div class="form-row">
+                  <label for="compra-vacuna">Tipo de vacuna</label>
+                  <input id="compra-vacuna" name="vacuna" type="text" list="dl-tipo-vacuna" required>
+                </div>
+                <div class="form-row">
+                  <label for="compra-marca">Marca</label>
+                  <input id="compra-marca" name="marca" type="text" list="dl-marca">
+                </div>
+                <div class="form-row">
+                  <label for="compra-serie">Serie / lote</label>
+                  <input id="compra-serie" name="serie" type="text" list="dl-serie">
+                </div>
+                <div class="form-row">
+                  <label for="compra-fecha-venc">Fecha de vencimiento</label>
+                  <input id="compra-fecha-venc" name="fechaVencimiento" type="date">
+                </div>
+                <div class="form-row"
+                  style="grid-column: span 2; border: 1px solid #ddd; padding: 10px; border-radius: 4px;">
+                  <h5 style="margin-top:0;">Desglose por Lotes (Opcional si es compra simple)</h5>
+                  <div style="display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 100px;">
+                      <label style="font-size: 0.8rem;">Serie</label>
+                      <input type="text" id="compra-lote-serie" list="dl-serie" style="width: 100%;">
+                    </div>
+                    <div style="flex: 1; min-width: 100px;">
+                      <label style="font-size: 0.8rem;">Vencimiento</label>
+                      <input type="date" id="compra-lote-venc" style="width: 100%;">
+                    </div>
+                    <div style="flex: 1; min-width: 100px;">
+                      <label style="font-size: 0.8rem;">Cantidad</label>
+                      <input type="number" id="compra-lote-cant" min="1" style="width: 100%;">
+                    </div>
+                    <button type="button" id="btn-compra-agregar-lote" class="secondary"
+                      style="padding: 5px 10px;">Agregar</button>
+                  </div>
+                  <table class="table" style="margin-top: 10px; font-size: 0.85rem;" id="tabla-compra-lotes">
+                    <thead>
+                      <tr>
+                        <th>Serie</th>
+                        <th>Vencimiento</th>
+                        <th>Cant.</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody id="tbody-compra-lotes"></tbody>
+                  </table>
+                </div>
+                <div class="form-row">
+                  <label for="compra-cantidad">Cantidad de dosis</label>
+                  <input id="compra-cantidad" name="cantidadDosis" type="number" min="1" step="1" required>
+                </div>
+                <div class="form-row">
+                  <label for="compra-dosis-frasco">Dosis por Frasco</label>
+                  <input type="number" id="compra-dosis-frasco" name="dosisPorFrasco" min="1" value="125" required>
+                </div>
+                <div class="form-row">
+                  <label for="compra-frascos">Frascos</label>
+                  <input type="number" id="compra-frascos" name="frascos" readonly class="readonly-input">
+                </div>
+                <div class="form-row">
+                  <label for="compra-realiza">Nombre de quien realiza la compra</label>
+                  <input id="compra-realiza" name="comprador" type="text" list="dl-comprador">
+                </div>
+                <div class="form-actions">
+                  <button type="submit">Registrar compra</button>
+                </div>
+              </form>
+            </div>
+            <div>
+              <h4>Registrar recepción</h4>
+              <form id="form-entrega" class="form">
+                <div class="form-row">
+                  <button type="button" id="btn-proveedor-entrega" class="secondary">Proveedor</button>
+                </div>
+                <div class="dropdown">
+                  <div id="lista-proveedores-entrega" class="dropdown-panel hidden"></div>
+                </div>
+                <div class="form-row">
+                  <label for="entrega-fecha">Fecha</label>
+                  <input id="entrega-fecha" name="fecha" type="date" required>
+                </div>
+                <div class="form-row">
+                  <label for="entrega-remito">N° de remito</label>
+                  <input id="entrega-remito" name="remito" type="text">
+                </div>
+                <div class="form-row">
+                  <label for="entrega-vacuna">Tipo de vacuna</label>
+                  <input id="entrega-vacuna" name="vacuna" type="text" list="dl-tipo-vacuna" required>
+                </div>
+                <div class="form-row">
+                  <label for="entrega-marca">Marca</label>
+                  <input id="entrega-marca" name="marca" type="text" list="dl-marca">
+                </div>
+                <div class="form-row">
+                  <label for="entrega-serie">Serie / lote</label>
+                  <input id="entrega-serie" name="serie" type="text" list="dl-serie">
+                </div>
+                <div class="form-row">
+                  <label for="entrega-fecha-venc">Fecha de vencimiento</label>
+                  <input id="entrega-fecha-venc" name="fechaVencimiento" type="date">
+                </div>
+                <div class="form-row">
+                  <label for="entrega-cantidad">Cantidad de dosis</label>
+                  <input id="entrega-cantidad" name="cantidadDosis" type="number" min="1" step="1" required>
+                </div>
+                <div class="form-row">
+                  <label for="entrega-dosis-frasco">Dosis por Frasco</label>
+                  <input type="number" id="entrega-dosis-frasco" name="dosisPorFrasco" min="1" value="125" required>
+                </div>
+                <div class="form-row">
+                  <label for="entrega-frascos">Frascos</label>
+                  <input type="number" id="entrega-frascos" name="frascos" readonly class="readonly-input">
+                </div>
+                <div class="form-row">
+                  <label for="entrega-receptor">Nombre de quien recibe</label>
+                  <input id="entrega-receptor" name="receptor" type="text" list="dl-receptor" required>
+                </div>
+                <div class="form-actions">
+                  <button type="submit">Registrar recepción</button>
+                </div>
+              </form>
+            </div>
+          </div>
+          <h4>Detalle de movimientos</h4>
+          <div class="filters">
+            <div class="form-inline">
+              <div class="form-row">
+                <label for="filtro-proveedor">Proveedor</label>
+                <select id="filtro-proveedor">
+                  <option value="">Seleccionar proveedor</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <label for="filtro-fecha-desde">Fecha desde</label>
+                <input id="filtro-fecha-desde" type="date">
+              </div>
+              <div class="form-row">
+                <label for="filtro-fecha-hasta">Fecha hasta</label>
+                <input id="filtro-fecha-hasta" type="date">
+              </div>
+              <div class="form-row">
+                <label for="filtro-vacuna">Tipo de vacuna</label>
+                <input id="filtro-vacuna" type="text" list="dl-tipo-vacuna" placeholder="Todos">
+              </div>
+              <div class="form-row">
+                <label for="filtro-tipo-mov">Movimiento</label>
+                <select id="filtro-tipo-mov">
+                  <option value="">Todos</option>
+                  <option value="compra">Compra</option>
+                  <option value="entrega">Recepción</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <label for="filtro-comprobante">Factura o remito</label>
+                <div class="filtro-ultima-linea">
+                  <input id="filtro-comprobante" type="text">
+                  <button type="button" id="btn-aplicar-filtros" class="icon-btn" title="Aplicar filtros">🔍</button>
+                  <button type="button" id="btn-limpiar-filtros" class="icon-btn icon-danger"
+                    title="Limpiar filtros">🧹</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <datalist id="dl-tipo-vacuna"></datalist>
+          <datalist id="dl-marca"></datalist>
+          <datalist id="dl-serie"></datalist>
+          <datalist id="dl-fecha-venc"></datalist>
+          <datalist id="dl-comprador"></datalist>
+          <datalist id="dl-receptor"></datalist>
+          <div class="table-wrapper">
+            <table class="table" id="tabla-movimientos">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Factura/Remito</th>
+                  <th>Tipo de vacuna</th>
+                  <th>Marca</th>
+                  <th>Serie/Lote</th>
+                  <th>Fecha de venc.</th>
+                  <th class="col-cant">Cantidad</th>
+                  <th>Realiza/Recibe</th>
+                  <th>Tipo</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+      <section class="card section hidden" data-section="clientes">
+        <h2>Clientes</h2>
+        <div class="grid-2 grid-clientes">
+          <form id="form-cliente" class="form form-cliente-compacta">
+            <div class="form-row">
+              <label for="cli-renspa">N° RENSPA / Unidad Productiva</label>
+              <input id="cli-renspa" name="renspa" type="text" required
+                pattern="^[0-9]{2}\.[0-9]{3}\.[0-9]\.[0-9]{5}/[0-9]{2}$" placeholder="12.345.6.78901/23">
+            </div>
+            <div class="form-row">
+              <label for="cli-nombre">Nombre</label>
+              <input id="cli-nombre" name="nombre" type="text" required>
+            </div>
+            <div class="form-row">
+              <label for="cli-documento">DNI o CUIT</label>
+              <input id="cli-documento" name="documento" type="text">
+            </div>
+            <div class="form-row">
+              <label for="cli-establecimiento">Establecimiento</label>
+              <input id="cli-establecimiento" name="establecimiento" type="text">
+            </div>
+            <div class="form-row">
+              <label for="cli-localidad">Localidad</label>
+              <input id="cli-localidad" name="localidad" type="text" list="dl-cli-localidad">
+            </div>
+            <div class="form-row">
+              <label for="cli-departamento">Departamento</label>
+              <input id="cli-departamento" name="departamento" type="text" list="dl-cli-departamento">
+            </div>
+            <div class="form-row">
+              <label for="cli-provincia">Provincia</label>
+              <input id="cli-provincia" name="provincia" type="text">
+            </div>
+            <div class="form-row">
+              <label for="cli-vacunador">Vacunador (Predeterminado)</label>
+              <select id="cli-vacunador" name="vacunadorId">
+                <option value="">Ninguno</option>
+              </select>
+            </div>
+            <div class="form-actions">
+              <button type="submit">Guardar cliente</button>
+              <button type="button" id="btn-importar-clientes-csv" class="secondary" style="margin-top: 10px;">
+                📥 Importar Clientes (CSV)
+              </button>
+              <input type="file" id="input-importar-clientes-csv" accept=".csv" style="display:none;">
+            </div>
+          </form>
+          <div class="table-wrapper">
+            <h3>Listado de clientes</h3>
+            <div class="filters">
+              <div class="form-inline">
+                <div class="form-row">
+                  <label for="filtro-cli-renspa">N° RENSPA / UP</label>
+                  <input id="filtro-cli-renspa" type="text" list="dl-cli-renspa" placeholder="12.345.6.78901/23">
+                </div>
+                <div class="form-row">
+                  <label for="filtro-cli-nombre">Nombre</label>
+                  <input id="filtro-cli-nombre" type="text" list="dl-cli-nombre">
+                </div>
+                <div class="form-row">
+                  <label for="filtro-cli-documento">DNI / CUIT</label>
+                  <input id="filtro-cli-documento" type="text" list="dl-cli-documento">
+                </div>
+                <div class="form-row">
+                  <label for="filtro-cli-localidad">Localidad</label>
+                  <input id="filtro-cli-localidad" type="text" list="dl-cli-localidad">
+                </div>
+                <div class="form-row">
+                  <label for="filtro-cli-departamento">Departamento</label>
+                  <input id="filtro-cli-departamento" type="text" list="dl-cli-departamento">
+                </div>
+                <div class="form-row">
+                  <label for="filtro-cli-provincia">Provincia</label>
+                  <input id="filtro-cli-provincia" type="text" list="dl-cli-provincia">
+                </div>
+                <div class="form-row filtros-acciones">
+                  <label></label>
+                  <div class="filtro-ultima-linea">
+                    <button type="button" id="btn-aplicar-filtros-cli" class="icon-btn"
+                      title="Aplicar filtros">🔍</button>
+                    <button type="button" id="btn-limpiar-filtros-cli" class="icon-btn icon-danger"
+                      title="Limpiar filtros">🧹</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <table class="table" id="tabla-clientes">
+              <thead>
+                <tr>
+                  <th>N° RENSPA / UP</th>
+                  <th>Nombre</th>
+                  <th>DNI / CUIT</th>
+                  <th>Establecimiento</th>
+                  <th>Localidad</th>
+                  <th>Departamento</th>
+                  <th>Provincia</th>
+                  <th>Vacunador</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="tbody-clientes"></tbody>
+            </table>
+          </div>
+          <datalist id="dl-cli-renspa"></datalist>
+          <datalist id="dl-cli-nombre"></datalist>
+          <datalist id="dl-cli-documento"></datalist>
+          <datalist id="dl-cli-localidad"></datalist>
+          <datalist id="dl-cli-departamento"></datalist>
+          <datalist id="dl-cli-provincia"></datalist>
+        </div>
+      </section>
+      <section class="card section hidden" data-section="vacunadores">
+        <h2>Vacunadores</h2>
+        <form id="form-vacunador" class="form">
+          <div class="form-row">
+            <label for="vac-nombre">Nombre</label>
+            <input id="vac-nombre" name="nombre" type="text">
+          </div>
+          <div class="form-row">
+            <label for="vac-documento">DNI o CUIT</label>
+            <input id="vac-documento" name="documento" type="text">
+          </div>
+          <div class="form-row">
+            <label for="vac-localidad">Localidad</label>
+            <input id="vac-localidad" name="localidad" type="text">
+          </div>
+          <div class="form-row">
+            <label for="vac-departamento">Departamento</label>
+            <input id="vac-departamento" name="departamento" type="text">
+          </div>
+          <div class="form-row">
+            <label for="vac-iva">Condición frente al IVA</label>
+            <select id="vac-iva" name="condicionIva">
+              <option value="">Seleccionar</option>
+              <option value="Responsable Inscripto">Responsable Inscripto</option>
+              <option value="Monotributo">Monotributo</option>
+              <option value="Exento">Exento</option>
+              <option value="Consumidor Final">Consumidor Final</option>
+              <option value="Ninguna">Ninguna</option>
+            </select>
+          </div>
+          <div class="form-actions">
+            <button type="submit">Guardar vacunador</button>
+          </div>
+        </form>
+        <div class="table-wrapper">
+          <h3>Listado de vacunadores</h3>
+          <table class="table" id="tabla-vacunadores">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>DNI / CUIT</th>
+                <th>Localidad</th>
+                <th>Departamento</th>
+                <th>Condición IVA</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="tbody-vacunadores"></tbody>
+          </table>
+        </div>
+        <hr class="mt-4 mb-4" />
+        <div class="table-wrapper">
+          <h3>Dashboard del Vacunador</h3>
+          <div class="form-inline form-inline-4">
+            <div class="form-row">
+              <label for="filtro-vacunador-dashboard">Vacunador</label>
+              <select id="filtro-vacunador-dashboard" class="form-control">
+                <option value="">Seleccione un Vacunador</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label for="filtro-dash-vac-acta">N° Acta</label>
+              <input type="text" id="filtro-dash-vac-acta" placeholder="Buscar acta...">
+            </div>
+            <div class="form-row">
+              <label for="filtro-dash-vac-desde">Fecha Desde</label>
+              <input type="date" id="filtro-dash-vac-desde">
+            </div>
+            <div class="form-row">
+              <label for="filtro-dash-vac-hasta">Fecha Hasta</label>
+              <input type="date" id="filtro-dash-vac-hasta">
+            </div>
+          </div>
+          <div id="dashboard-vacunador-content" class="hidden mt-3">
+            <div class="grid-2">
+              <div class="card summary-box" style="padding:15px; background:var(--bg-card);">
+                <h4 style="margin-top:0;">Aftosa (Dosis Físicas)</h4>
+                <p>Dosis Entregadas: <strong id="dash-aft-entregadas">0</strong></p>
+                <p>Dosis Aplicadas: <strong id="dash-aft-aplicadas">0</strong></p>
+                <p>Dosis Devueltas: <strong id="dash-aft-devueltas">0</strong></p>
+                <p>Stock Actual: <strong id="dash-aft-stock">0</strong></p>
+              </div>
+              <div class="card summary-box" style="padding:15px; background:var(--bg-card);">
+                <h4 style="margin-top:0;">Brucelosis (Dosis Físicas)</h4>
+                <p>Dosis Entregadas: <strong id="dash-bru-entregadas">0</strong></p>
+                <p>Dosis Aplicadas: <strong id="dash-bru-aplicadas">0</strong></p>
+                <p>Dosis Devueltas: <strong id="dash-bru-devueltas">0</strong></p>
+                <p>Stock Actual: <strong id="dash-bru-stock">0</strong></p>
+              </div>
+            </div>
+
+            <div class="grid-3 mt-3">
+              <div class="card summary-box" style="padding:15px; background:var(--bg-card);">
+                <h4 style="margin-top:0;">Total a Cobrar</h4>
+                <p style="font-size: 1.5rem; color: #1565c0;"><strong id="dash-finanzas-cobrar">$0.00</strong></p>
+              </div>
+              <div class="card summary-box" style="padding:15px; background:var(--bg-card);">
+                <h4 style="margin-top:0;">Total Pagado</h4>
+                <p style="font-size: 1.5rem; color: #2e7d32;"><strong id="dash-finanzas-pagado">$0.00</strong></p>
+              </div>
+              <div class="card summary-box" style="padding:15px; background:var(--bg-card);">
+                <h4 style="margin-top:0;">Saldo Pendiente</h4>
+                <p style="font-size: 1.5rem; color: #c62828;"><strong id="dash-finanzas-saldo">$0.00</strong></p>
+              </div>
+            </div>
+
+            <div class="table-wrapper mt-3">
+              <h4>Estado de Cuenta (Honorarios y Movilidad)</h4>
+              <table class="table" id="tabla-dashboard-vacunador-finanzas">
+                <thead>
+                  <tr>
+                    <th>Fecha</th>
+                    <th>Tipo</th>
+                    <th>N° Acta / Ref</th>
+                    <th>Mano de Obra ($)</th>
+                    <th>Movilidad ($)</th>
+                    <th>Total ($)</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-dashboard-vacunador-finanzas"></tbody>
+              </table>
+            </div>
+
+            <div class="table-wrapper mt-4">
+              <h4>Historial Físico Detallado</h4>
+              <table class="table" id="tabla-dashboard-vacunador">
+                <thead>
+                  <tr>
+                    <th>Fecha</th>
+                    <th>Tipo</th>
+                    <th>N° Acta</th>
+                    <th>Vacuna</th>
+                    <th>Marca</th>
+                    <th>Serie</th>
+                    <th>Dosis</th>
+                    <th>Frascos</th>
+                    <th>Cant. Actas</th>
+                    <th>Numeración</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-dashboard-vacunador"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="card section hidden" data-section="vacunacion">
+        <h2>Vacunación</h2>
+        <form id="form-vacunacion" class="form">
+          <div class="form-inline form-inline-6">
+            <div class="form-row">
+              <label for="vac-fecha">Fecha</label>
+              <input id="vac-fecha" name="fecha" type="date" required>
+            </div>
+            <div class="form-row">
+              <label for="vac-acta">N° de acta</label>
+              <input id="vac-acta" name="acta" type="text">
+            </div>
+            <div class="form-row">
+              <label for="vac-estado">Estado del Acta</label>
+              <select id="vac-estado" name="estado">
+                <option value="vigente" selected>Vigente</option>
+                <option value="anulada">Anulada</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label for="vac-anio">Año</label>
+              <input type="number" id="vac-anio" name="anio" min="2000" max="2100" required>
+            </div>
+            <div class="form-row">
+              <label for="vac-periodo">Período</label>
+              <select id="vac-periodo" name="periodo">
+                <option value="1P">1° Período</option>
+                <option value="2P">2° Período</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label for="vac-tipo-vacunacion">Tipo de vacunación</label>
+              <select id="vac-tipo-vacunacion" name="tipoVacunacion">
+                <option value="sistematica">Sistemática</option>
+                <option value="estrategica">Estratégica</option>
+                <option value="cero">Cero</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row form-proveedor-inline">
+            <div>
+              <label for="vac-renspa">RENSPA</label>
+              <input id="vac-renspa" name="renspa" type="text" list="dl-cli-renspa" required>
+            </div>
+            <div>
+              <label for="vac-nombre-cli">Nombre</label>
+              <input id="vac-nombre-cli" name="nombreCli" type="text" readonly>
+            </div>
+            <div>
+              <label for="vac-establecimiento">Establecimiento</label>
+              <input id="vac-establecimiento" name="establecimiento" type="text" readonly>
+            </div>
+            <div>
+              <label for="vac-localidad-cli">Localidad</label>
+              <input id="vac-localidad-cli" name="localidadCli" type="text" readonly>
+            </div>
+            <div>
+              <label for="vac-departamento-cli">Departamento</label>
+              <input id="vac-departamento-cli" name="departamentoCli" type="text" readonly>
+            </div>
+          </div>
+          <h3>Detalle de vacunación aftosa</h3>
+          <div class="table-wrapper">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Vacas</th>
+                  <th class="col-toro-producto">Toros</th>
+                  <th>Vaquillonas</th>
+                  <th>Novillos</th>
+                  <th>Novillitos</th>
+                  <th>Toritos</th>
+                  <th>Terneras</th>
+                  <th>Terneros</th>
+                  <th>Total</th>
+                  <th>Marca vacuna aftosa</th>
+                  <th>Serie vacuna aftosa</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><input id="aft-vacas" name="aftVacas" type="number" min="0" step="1"></td>
+                  <td class="col-toro-producto"><input id="aft-toros" name="aftToros" type="number" min="0" step="1">
+                  </td>
+                  <td><input id="aft-vaquillonas" name="aftVaquillonas" type="number" min="0" step="1"></td>
+                  <td><input id="aft-novillos" name="aftNovillos" type="number" min="0" step="1"></td>
+                  <td><input id="aft-novillitos" name="aftNovillitos" type="number" min="0" step="1"></td>
+                  <td><input id="aft-toritos" name="aftToritos" type="number" min="0" step="1"></td>
+                  <td><input id="aft-terneras" name="aftTerneras" type="number" min="0" step="1"></td>
+                  <td><input id="aft-terneros" name="aftTerneros" type="number" min="0" step="1"></td>
+                  <td><input id="aft-total" name="aftTotal" type="number" readonly></td>
+                  <td><input id="aft-marca" name="aftMarca" type="text" list="dl-aft-marca"></td>
+                  <td><input id="aft-serie" name="aftSerie" type="text" list="dl-aft-serie"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <h3>Detalle vacunación brucelosis</h3>
+          <div class="table-wrapper">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Terneras</th>
+                  <th>Marca vacuna brucelosis</th>
+                  <th>Serie vacuna brucelosis</th>
+                  <th>Vacunador</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><input id="bru-terneras" name="bruTerneras" type="number" min="0" step="1"></td>
+                  <td><input id="bru-marca" name="bruMarca" type="text" list="dl-bru-marca"></td>
+                  <td><input id="bru-serie" name="bruSerie" type="text" list="dl-bru-serie"></td>
+                  <td>
+                    <select id="vac-vacunador" name="vacunador">
+                      <option value="">Seleccionar vacunador</option>
+                    </select>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <h3>Datos para la facturación</h3>
+          <!-- Fila 1 -->
+          <div class="form-row form-inline form-inline-3">
+            <div>
+              <label for="fact-total-vacunacion">Importe del N° de acta</label>
+              <input id="fact-total-vacunacion" type="number" readonly>
+            </div>
+            <div>
+              <label for="fact-nro-factura">N° de Factura</label>
+              <input id="fact-nro-factura" name="nroFactura" type="text" placeholder="00006-00000000" maxlength="14"
+                value="00006-">
+            </div>
+            <div>
+              <label for="fact-sigsa">SIGSA</label>
+              <select id="fact-sigsa" name="sigsa">
+                <option value="no" selected>No</option>
+                <option value="si">Sí</option>
+              </select>
+            </div>
+          </div>
+          <!-- Fila 2 -->
+          <div class="form-row form-inline form-inline-4">
+            <div>
+              <label for="fact-aftosa-si-no">Incluir costo Aftosa</label>
+              <select id="fact-aftosa-si-no">
+                <option value="si" selected>Sí</option>
+                <option value="no">No</option>
+              </select>
+            </div>
+            <div>
+              <label for="fact-aftosa-importe-vacuna">Vacuna aftosa</label>
+              <input id="fact-aftosa-importe-vacuna" type="number" readonly>
+            </div>
+            <div>
+              <label for="fact-brucelosis-si-no">Incluir costo Brucelosis</label>
+              <select id="fact-brucelosis-si-no">
+                <option value="si" selected>Sí</option>
+                <option value="no">No</option>
+              </select>
+            </div>
+            <div>
+              <label for="fact-brucelosis-importe-vacuna">Vacuna brucelosis</label>
+              <input id="fact-brucelosis-importe-vacuna" type="number" readonly>
+            </div>
+          </div>
+          <!-- Fila 3 -->
+          <div class="form-row form-inline form-inline-4">
+            <div>
+              <label for="fact-mano-si-no">Mano de obra</label>
+              <select id="fact-mano-si-no">
+                <option value="no" selected>No</option>
+                <option value="si">Sí</option>
+              </select>
+            </div>
+            <div>
+              <label for="fact-mano-tipo">Tipo de mano de obra</label>
+              <select id="fact-mano-tipo">
+                <option value="sin" selected>Sin mano de obra</option>
+                <option value="organizado">Campo organizado</option>
+                <option value="abierto">Campo abierto</option>
+              </select>
+            </div>
+            <div>
+              <label for="fact-aftosa-importe-mano">Mano de obra aftosa</label>
+              <input id="fact-aftosa-importe-mano" type="number" readonly>
+            </div>
+            <div>
+              <label for="fact-brucelosis-importe-mano">Mano de obra brucelosis</label>
+              <input id="fact-brucelosis-importe-mano" type="number" readonly>
+            </div>
+          </div>
+          <!-- Fila 4 -->
+          <div class="form-row form-inline form-inline-2">
+            <div>
+              <label for="fact-aftosa-total">Total vacuna aftosa</label>
+              <input id="fact-aftosa-total" type="number" readonly>
+            </div>
+            <div>
+              <label for="fact-brucelosis-total">Total vacuna brucelosis</label>
+              <input id="fact-brucelosis-total" type="number" readonly>
+            </div>
+          </div>
+          <!-- Fila 5 -->
+          <div class="form-row form-inline form-inline-3">
+            <div>
+              <label for="fact-movilidad-si-no">Movilidad</label>
+              <select id="fact-movilidad-si-no">
+                <option value="no" selected>No</option>
+                <option value="si">Sí</option>
+              </select>
+            </div>
+            <div>
+              <label for="fact-movilidad-km">Km recorridos</label>
+              <input id="fact-movilidad-km" type="number" min="0" step="0.1">
+            </div>
+            <div>
+              <label for="fact-movilidad-importe">Total Movilidad</label>
+              <input id="fact-movilidad-importe" type="number" readonly>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit">Guardar vacunación</button>
+          </div>
+        </form>
+        <h3>Listado de vacunaciones</h3>
+        <div class="filters">
+          <div class="form-inline">
+            <div class="form-row">
+              <label for="filtro-vac-fecha">Fecha</label>
+              <input id="filtro-vac-fecha" type="date">
+            </div>
+            <div class="form-row">
+              <label for="filtro-vac-acta">N° de acta</label>
+              <input id="filtro-vac-acta" type="text">
+            </div>
+            <div class="form-row">
+              <label for="filtro-vac-renspa">RENSPA</label>
+              <input id="filtro-vac-renspa" type="text">
+            </div>
+            <div class="form-row">
+              <label for="filtro-vac-factura">N° Factura</label>
+              <input id="filtro-vac-factura" type="text">
+            </div>
+            <div class="form-row">
+              <label for="filtro-vac-nombre">Nombre</label>
+              <input id="filtro-vac-nombre" type="text">
+            </div>
+            <div class="form-row">
+              <label for="filtro-vac-localidad">Localidad</label>
+              <input id="filtro-vac-localidad" type="text">
+            </div>
+            <div class="form-row">
+              <label for="filtro-vac-departamento">Departamento</label>
+              <input id="filtro-vac-departamento" type="text">
+            </div>
+            <div class="form-row">
+              <label for="filtro-vac-periodo">Período</label>
+              <select id="filtro-vac-periodo">
+                <option value="">Todos</option>
+                <option value="1P">1° Período</option>
+                <option value="2P">2° Período</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label for="filtro-vac-anio">Año</label>
+              <input type="number" id="filtro-vac-anio" placeholder="Todos">
+            </div>
+            <div class="form-row">
+              <label for="filtro-vac-tipo">Tipo de vacunación</label>
+              <select id="filtro-vac-tipo">
+                <option value="">Todos</option>
+                <option value="sistematica">Sistemática</option>
+                <option value="estrategica">Estratégica</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label for="filtro-vac-vacunador">Vacunador</label>
+              <input id="filtro-vac-vacunador" type="text">
+            </div>
+            <div class="form-row">
+              <label for="filtro-vac-sigsa">SIGSA</label>
+              <select id="filtro-vac-sigsa">
+                <option value="">Todos</option>
+                <option value="si">Sí</option>
+                <option value="no">No</option>
+              </select>
+            </div>
+            <div class="form-row filtros-acciones">
+              <label>Acciones</label>
+              <div class="filtro-ultima-linea">
+                <button type="button" id="btn-aplicar-filtros-vac">Aplicar filtros</button>
+                <button type="button" id="btn-limpiar-filtros-vac" class="secondary">Limpiar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <table class="table" id="tabla-vacunaciones">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>N° acta</th>
+                <th>N° Factura</th>
+                <th>RENSPA</th>
+                <th>Nombre</th>
+                <th>Localidad</th>
+                <th>Departamento</th>
+                <th>Período</th>
+                <th>Año</th>
+                <th>Tipo vacunación</th>
+                <th>Vacunador</th>
+                <th>Aftosa (total)</th>
+                <th>Brucelosis (terneras)</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="tbody-vacunaciones"></tbody>
+          </table>
+        </div>
+      </section>
+      <datalist id="dl-aft-marca"></datalist>
+      <datalist id="dl-aft-serie"></datalist>
+      <datalist id="dl-aft-venc"></datalist>
+      <datalist id="dl-bru-marca"></datalist>
+      <datalist id="dl-bru-serie"></datalist>
+      <datalist id="dl-bru-venc"></datalist>
+      <section class="card section hidden sin-espacio-top" data-section="cobro">
+        <h2 class="hidden">Cobro</h2>
+        <form id="form-cobro" class="form">
+          <div class="form-inline form-inline-4">
+            <div class="form-row">
+              <label for="cobro-fecha">Fecha de cobro</label>
+              <input id="cobro-fecha" name="fechaCobro" type="date" required>
+            </div>
+            <div class="form-row">
+              <label for="cobro-acta">N° de acta</label>
+              <input id="cobro-acta" name="acta" type="text" list="dl-cobro-actas" required>
+            </div>
+            <div class="form-row">
+              <label for="cobro-rendicion">N° de rendición de cuenta</label>
+              <input id="cobro-rendicion" name="rendicion" type="text" placeholder="Ingresar n° de rendición">
+            </div>
+            <div class="form-row">
+              <label for="cobro-importe">Importe del acta</label>
+              <input id="cobro-importe" name="importe" type="number" readonly>
+            </div>
+          </div>
+          <div class="form-row form-proveedor-inline">
+            <div>
+              <label for="cobro-renspa">RENSPA</label>
+              <input id="cobro-renspa" name="renspa" type="text" list="dl-cli-renspa" placeholder="12.345.6.78901/23">
+            </div>
+            <div>
+              <label for="cobro-nombre">Nombre</label>
+              <input id="cobro-nombre" name="nombre" type="text" readonly>
+            </div>
+            <div>
+              <label for="cobro-pagada">Acta pagada</label>
+              <select id="cobro-pagada" name="pagada">
+                <option value="no">No</option>
+                <option value="si">Sí</option>
+              </select>
+            </div>
+            <div class="form-row" style="grid-column: span 2;">
+              <p class="helper-text hidden" id="hint-cobro-pagada">Completá los montos en las secciones correspondientes
+                (Efectivo, Transferencia, Cheques).</p>
+            </div>
+          </div>
+          <div id="bloque-cobro-efectivo" class="form-row hidden">
+            <h3 style="margin-top:1rem;">Pago en Efectivo</h3>
+            <div class="form-row form-proveedor-inline" style="margin-top:0.5rem;">
+              <div>
+                <label for="cobro-efectivo-monto">Monto en Efectivo</label>
+                <input type="number" id="cobro-efectivo-monto" name="efectivoMonto" min="0" step="0.01">
+              </div>
+              <div>
+                <label for="cobro-efectivo-destino">Destino (Fondo)</label>
+                <input id="cobro-efectivo-destino" type="text" list="dl-destinos">
+              </div>
+            </div>
+          </div>
+          <div id="bloque-cobro-transferencia" class="form-row hidden">
+            <h3 style="margin-top:1rem;">Pago por Transferencia</h3>
+            <div class="form-row form-proveedor-inline"
+              style="margin-top:0.5rem; background: #f0f7ff; padding: 10px; border-radius: 4px; border: 1px solid #cce3ff;">
+              <div>
+                <label for="cobro-transf-monto">Monto Transferido</label>
+                <input id="cobro-transf-monto" name="transfMonto" type="number" min="0" step="0.01">
+              </div>
+              <div>
+                <label for="cobro-transf-origen">Banco origen</label>
+                <input id="cobro-transf-origen" name="transfBancoOrigen" type="text">
+              </div>
+              <div>
+                <label for="cobro-transf-numero">N° de transferencia</label>
+                <input id="cobro-transf-numero" name="transfNumero" type="text">
+              </div>
+              <div>
+                <label for="cobro-transf-destino">Banco destino</label>
+                <input id="cobro-transf-destino" name="transfBancoDestino" type="text">
+              </div>
+              <div>
+                <label for="cobro-transf-fondo-destino">Fondo (Ej: Caja)</label>
+                <input id="cobro-transf-fondo-destino" name="transfFondoDestino" type="text" list="dl-destinos">
+              </div>
+              <div style="display: flex; align-items: flex-end;">
+                <button type="button" id="btn-cobro-agregar-transf" class="secondary">Agregar</button>
+              </div>
+            </div>
+            <table class="table" id="tabla-cobro-transferencias" style="margin-top: 10px; font-size: 0.85rem;">
+              <thead>
+                <tr>
+                  <th>Monto</th>
+                  <th>N°</th>
+                  <th>Origen</th>
+                  <th>Destino</th>
+                  <th>Fondo</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="tbody-cobro-transferencias"></tbody>
+            </table>
+          </div>
+          <div id="bloque-cobro-cheques" class="hidden">
+            <h3>Cheques</h3>
+            <div class="form-row form-proveedor-inline"
+              style="background: #fff4e5; padding: 10px; border-radius: 4px; border: 1px solid #ffe8cc;">
+              <div>
+                <label for="cheque-banco">Banco</label>
+                <input id="cheque-banco" type="text">
+              </div>
+              <div>
+                <label for="cheque-numero">N° de cheque</label>
+                <input id="cheque-numero" type="text">
+              </div>
+              <div>
+                <label for="cheque-fecha">Fecha del cheque</label>
+                <input id="cheque-fecha" type="date">
+              </div>
+              <div>
+                <label for="cheque-fecha-cobro">Fecha de cobro</label>
+                <input id="cheque-fecha-cobro" type="date">
+              </div>
+              <div>
+                <label for="cheque-importe">Monto</label>
+                <input id="cheque-importe" type="number" min="0" step="0.01">
+              </div>
+              <div>
+                <label for="cheque-destino">Destino</label>
+                <input id="cheque-destino" type="text" list="dl-destinos">
+              </div>
+              <div style="display: flex; align-items: flex-end;">
+                <button type="button" id="btn-agregar-cheque" class="secondary">Agregar</button>
+              </div>
+            </div>
+            <table class="table" id="tabla-cheques" style="margin-top: 10px; font-size: 0.85rem;">
+              <thead>
+                <tr>
+                  <th>Banco</th>
+                  <th>N°</th>
+                  <th>Fecha</th>
+                  <th>Cobro</th>
+                  <th>Importe</th>
+                  <th>Destino</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="tbody-cheques"></tbody>
+            </table>
+          </div>
+          <div class="form-actions">
+            <button type="submit">Guardar cobro</button>
+          </div>
+        </form>
+        <h3>Actas pendientes de cobro</h3>
+        <div class="table-wrapper">
+          <table class="table" id="tabla-actas-pendientes">
+            <thead>
+              <tr>
+                <th>Fecha acta</th>
+                <th>N° acta</th>
+                <th>RENSPA</th>
+                <th>Nombre</th>
+                <th>Importe acta</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="tbody-actas-pendientes"></tbody>
+          </table>
+        </div>
+        <h3>Listado de cobros</h3>
+        <div class="table-wrapper">
+          <table class="table" id="tabla-cobros">
+            <thead>
+              <tr>
+                <th>Fecha cobro</th>
+                <th>N° acta</th>
+                <th>N° Factura</th>
+                <th>RENSPA</th>
+                <th>Nombre</th>
+                <th>Importe acta</th>
+                <th>Rendición</th>
+                <th>Pagada</th>
+                <th>Forma de pago</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="tbody-cobros"></tbody>
+          </table>
+        </div>
+        <datalist id="dl-cobro-actas"></datalist>
+      </section>
+      <section class="card section hidden sin-espacio-top" data-section="pagos">
+        <h2 class="hidden">Pagos a vacunadores</h2>
+        <form id="form-pago-vacunador" class="form">
+          <div class="form-inline form-inline-4">
+            <div class="form-row">
+              <label for="pago-vac-fecha">Fecha de pago</label>
+              <input id="pago-vac-fecha" name="fechaPago" type="date" required>
+            </div>
+            <div class="form-row">
+              <label for="pago-vac-vacunador">Vacunador</label>
+              <select id="pago-vac-vacunador" name="vacunadorId" required>
+                <option value="">Seleccionar vacunador</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label for="pago-vac-acta">N° de acta</label>
+              <input id="pago-vac-acta" name="acta" type="text" list="dl-pago-vac-actas"
+                placeholder="Elegí o escribí y agregá">
+            </div>
+            <div class="form-row">
+              <label for="pago-vac-rendicion">N° de rendición de cuenta</label>
+              <input id="pago-vac-rendicion" name="rendicion" type="text" placeholder="Ingresar n° de rendición">
+            </div>
+          </div>
+          <div class="form-inline">
+            <div class="form-row">
+              <label>&nbsp;</label>
+              <button type="button" id="btn-pago-vac-agregar-acta">Agregar acta</button>
+            </div>
+          </div>
+          <div class="form-row form-proveedor-inline">
+            <div>
+              <label for="pago-vac-imp-mano">Importe mano de obra</label>
+              <input id="pago-vac-imp-mano" name="importeMano" type="number" readonly>
+            </div>
+            <div>
+              <label for="pago-vac-imp-mov">Importe movilidad</label>
+              <input id="pago-vac-imp-mov" name="importeMovilidad" type="number" readonly>
+            </div>
+            <div>
+              <label for="pago-vac-imp-total">Total a pagar</label>
+              <input id="pago-vac-imp-total" name="importeTotal" type="number" readonly>
+            </div>
+          </div>
+          <h3>Actas seleccionadas para este pago</h3>
+          <div class="table-wrapper">
+            <table class="table" id="tabla-pago-vac-seleccion">
+              <thead>
+                <tr>
+                  <th>N° acta</th>
+                  <th>Vacunador</th>
+                  <th>Importe a pagar</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="tbody-pago-vac-seleccion"></tbody>
+            </table>
+          </div>
+          <div class="form-inline form-inline-4">
+            <div class="form-row">
+              <label for="pago-vac-estado">Pago</label>
+              <select id="pago-vac-estado" name="pagada">
+                <option value="no">Impaga</option>
+                <option value="si">Paga</option>
+              </select>
+            </div>
+            <div class="form-row" style="grid-column: span 2;">
+              <p class="helper-text hidden" id="hint-pago-vac-pagada">Completá los montos en las secciones
+                correspondientes (Efectivo, Transferencia, Cheques).</p>
+            </div>
+          </div>
+          <div id="bloque-pago-vac-efectivo" class="form-row hidden">
+            <h3 style="margin-top:1rem;">Pago en Efectivo</h3>
+            <div class="form-row form-proveedor-inline" style="margin-top:0.5rem;">
+              <div>
+                <label for="pago-vac-efectivo-monto">Monto en Efectivo</label>
+                <input type="number" id="pago-vac-efectivo-monto" name="efectivoMonto" min="0" step="0.01">
+              </div>
+            </div>
+          </div>
+          <div id="bloque-pago-vac-transferencia" class="form-row hidden">
+            <h3 style="margin-top:1rem;">Pago por Transferencia</h3>
+            <div class="form-row form-proveedor-inline"
+              style="margin-top:0.5rem; background: #f0f7ff; padding: 10px; border-radius: 4px; border: 1px solid #cce3ff;">
+              <div>
+                <label for="pago-vac-transf-monto">Monto Transferido</label>
+                <input id="pago-vac-transf-monto" name="transfMonto" type="number" min="0" step="0.01">
+              </div>
+              <div>
+                <label for="pago-vac-transf-origen">Banco origen</label>
+                <input id="pago-vac-transf-origen" name="transfBancoOrigen" type="text">
+              </div>
+              <div>
+                <label for="pago-vac-transf-numero">N° de transferencia</label>
+                <input id="pago-vac-transf-numero" name="transfNumero" type="text">
+              </div>
+              <div>
+                <label for="pago-vac-transf-destino">Banco destino</label>
+                <input id="pago-vac-transf-destino" name="transfBancoDestino" type="text">
+              </div>
+              <div style="display: flex; align-items: flex-end;">
+                <button type="button" id="btn-pago-vac-agregar-transf" class="secondary">Agregar</button>
+              </div>
+            </div>
+            <table class="table" id="tabla-pago-vac-transferencias" style="margin-top: 10px; font-size: 0.85rem;">
+              <thead>
+                <tr>
+                  <th>Monto</th>
+                  <th>N°</th>
+                  <th>Origen</th>
+                  <th>Destino</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="tbody-pago-vac-transferencias"></tbody>
+            </table>
+          </div>
+          <div id="bloque-pago-vac-cheques" class="hidden">
+            <h3>Cheques</h3>
+            <div class="form-row form-proveedor-inline"
+              style="background: #fff4e5; padding: 10px; border-radius: 4px; border: 1px solid #ffe8cc;">
+              <div>
+                <label for="pago-vac-cheque-banco">Banco</label>
+                <input id="pago-vac-cheque-banco" type="text">
+              </div>
+              <div>
+                <label for="pago-vac-cheque-numero">N° de cheque</label>
+                <input id="pago-vac-cheque-numero" type="text">
+              </div>
+              <div>
+                <label for="pago-vac-cheque-fecha-cheque">Fecha del cheque</label>
+                <input id="pago-vac-cheque-fecha-cheque" type="date">
+              </div>
+              <div>
+                <label for="pago-vac-cheque-fecha-cobro">Fecha de cobro</label>
+                <input id="pago-vac-cheque-fecha-cobro" type="date">
+              </div>
+              <div>
+                <label for="pago-vac-cheque-importe">Monto</label>
+                <input id="pago-vac-cheque-importe" type="number" min="0" step="0.01">
+              </div>
+              <div>
+                <label for="pago-vac-cheque-destino">Destino</label>
+                <input id="pago-vac-cheque-destino" type="text" list="dl-destinos">
+              </div>
+              <div style="display: flex; align-items: flex-end;">
+                <button type="button" id="btn-pago-vac-agregar-cheque" class="secondary">Agregar</button>
+              </div>
+            </div>
+            <table class="table" id="tabla-pago-vac-cheques" style="margin-top: 10px; font-size: 0.85rem;">
+              <thead>
+                <tr>
+                  <th>Banco</th>
+                  <th>N°</th>
+                  <th>Fecha</th>
+                  <th>Cobro</th>
+                  <th>Importe</th>
+                  <th>Destino</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="tbody-pago-vac-cheques-v2"></tbody>
+            </table>
+          </div>
+          <div class="form-actions">
+            <button type="submit">Guardar pago</button>
+          </div>
+        </form>
+        <h3>Actas por vacunador</h3>
+        <div class="table-wrapper">
+          <table class="table" id="tabla-pago-vac-actas">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>N° acta</th>
+                <th>Vacunador</th>
+                <th>Mano de obra</th>
+                <th>Movilidad</th>
+                <th>Total</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="tbody-pago-vac-actas"></tbody>
+          </table>
+        </div>
+        <h3>Pagos registrados</h3>
+        <div class="table-wrapper">
+          <table class="table" id="tabla-pagos-vacunadores">
+            <thead>
+              <tr>
+                <th>Fecha pago</th>
+                <th>Vacunador</th>
+                <th>N° acta</th>
+                <th>Rendición</th>
+                <th>Mano de obra</th>
+                <th>Movilidad</th>
+                <th>Total</th>
+                <th>Estado</th>
+                <th>Forma de pago</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="tbody-pagos-vacunadores"></tbody>
+          </table>
+        </div>
+        <datalist id="dl-pago-vac-actas"></datalist>
+      </section>
+      <section class="card section hidden sin-espacio-top" data-section="precios">
+        <h2 class="hidden">Precio de la vacuna</h2>
+        <div class="grid-2">
+          <div>
+            <h3>Precio base por dosis</h3>
+            <form id="form-precio-vacuna" class="form">
+              <div class="form-row">
+                <label for="tipo-precio-vacuna">Vacuna</label>
+                <select id="tipo-precio-vacuna" name="tipoPrecio">
+                  <option value="aftosa">Aftosa</option>
+                  <option value="brucelosis">Brucelosis</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <label for="precio-producto">Precio del producto (por dosis)</label>
+                <input id="precio-producto" name="precioProducto" type="number" min="0" step="0.01">
+              </div>
+              <div class="form-row">
+                <label for="costo-operativo">Costo operativo (por dosis)</label>
+                <input id="costo-operativo" name="costoOperativo" type="number" min="0" step="0.01">
+              </div>
+              <div class="form-row">
+                <label for="costo-coordinacion">Costo del coordinador (por dosis)</label>
+                <input id="costo-coordinacion" name="costoCoordinacion" type="number" min="0" step="0.01">
+              </div>
+              <h3>Precio de la mano de obra (por dosis)</h3>
+              <div class="form-row">
+                <label for="mano-obra-organizado">Campo organizado (con manga)</label>
+                <input id="mano-obra-organizado" name="manoObraOrganizado" type="number" min="0" step="0.01">
+              </div>
+              <div class="form-row">
+                <label for="mano-obra-abierto">Campo abierto (a lazo)</label>
+                <input id="mano-obra-abierto" name="manoObraAbierto" type="number" min="0" step="0.01">
+              </div>
+              <h3>Movilidad (opcional)</h3>
+              <div class="form-row">
+                <label for="movilidad-km">Movilidad (por km)</label>
+                <input id="movilidad-km" name="movilidadPorKm" type="number" min="0" step="0.01">
+              </div>
+              <div class="form-actions">
+                <button type="submit">Guardar precios</button>
+              </div>
+              <h3>Relación precio ternero / vacuna</h3>
+              <div class="form-inline">
+                <div class="form-row">
+                  <label for="precio-ternero">Precio del ternero</label>
+                  <input id="precio-ternero" type="number" min="0" step="0.01">
+                </div>
+                <div class="form-row">
+                  <label for="relacion-ternero-aftosa">Relación (precio ternero / vacuna)</label>
+                  <input id="relacion-ternero-aftosa" type="number" readonly>
+                </div>
+              </div>
+              <h3>Historial de precios</h3>
+              <div class="form-inline form-inline-4">
+                <div class="form-row">
+                  <label for="historial-fecha">Fecha del precio</label>
+                  <input id="historial-fecha" type="date">
+                </div>
+                <div class="form-row">
+                  <label>&nbsp;</label>
+                  <button type="button" id="btn-guardar-historial-precios">Guardar historial</button>
+                </div>
+                <div class="form-row">
+                  <label for="filtro-historial-desde">Fecha desde</label>
+                  <input id="filtro-historial-desde" type="date">
+                </div>
+                <div class="form-row">
+                  <label for="filtro-historial-hasta">Fecha hasta</label>
+                  <input id="filtro-historial-hasta" type="date">
+                </div>
+              </div>
+              <div class="table-wrapper">
+                <table class="table" id="tabla-precios-historial">
+                  <thead>
+                    <tr>
+                      <th>Fecha</th>
+                      <th>Aftosa organizado</th>
+                      <th>Aftosa abierto</th>
+                      <th>Brucelosis organizado</th>
+                      <th>Brucelosis abierto</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbody-precios-historial"></tbody>
+                </table>
+              </div>
+            </form>
+          </div>
+          <div>
+            <h3>Precio final por dosis</h3>
+            <div class="table-wrapper">
+              <table class="table" id="tabla-precio-final">
+                <thead>
+                  <tr>
+                    <th>Concepto</th>
+                    <th>Vacuna aftosa</th>
+                    <th>Vacuna brucelosis</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Precio del producto</td>
+                    <td id="celda-precio-producto-aftosa">0</td>
+                    <td id="celda-precio-producto-brucelosis">0</td>
+                  </tr>
+                  <tr>
+                    <td>Costo operativo</td>
+                    <td id="celda-costo-operativo-aftosa">0</td>
+                    <td id="celda-costo-operativo-brucelosis">0</td>
+                  </tr>
+                  <tr>
+                    <td>Costo del coordinador</td>
+                    <td id="celda-costo-coordinacion-aftosa">0</td>
+                    <td id="celda-costo-coordinacion-brucelosis">0</td>
+                  </tr>
+                  <tr>
+                    <td>Costo de la vacuna (sin mano de obra)</td>
+                    <td id="celda-costo-vacuna-aftosa">0</td>
+                    <td id="celda-costo-vacuna-brucelosis">0</td>
+                  </tr>
+                  <tr>
+                    <td>Mano de obra campo organizado</td>
+                    <td id="celda-mano-obra-organizado-aftosa">0</td>
+                    <td id="celda-mano-obra-organizado-brucelosis">0</td>
+                  </tr>
+                  <tr>
+                    <td>Mano de obra campo abierto</td>
+                    <td id="celda-mano-obra-abierto-aftosa">0</td>
+                    <td id="celda-mano-obra-abierto-brucelosis">0</td>
+                  </tr>
+                  <tr>
+                    <td>Movilidad (por km)</td>
+                    <td id="celda-movilidad-aftosa">0</td>
+                    <td id="celda-movilidad-brucelosis">0</td>
+                  </tr>
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <th>Precio por dosis campo organizado</th>
+                    <th id="celda-total-organizado-aftosa">0</th>
+                    <th id="celda-total-organizado-brucelosis">0</th>
+                  </tr>
+                  <tr>
+                    <th>Precio por dosis campo abierto</th>
+                    <th id="celda-total-abierto-aftosa">0</th>
+                    <th id="celda-total-abierto-brucelosis">0</th>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+            <p class="helper-text">La movilidad se carga por km y se suma aparte del precio por dosis cuando
+              corresponde.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card section hidden sin-espacio-top" data-section="actas-entrega">
+        <h2 class="hidden">Actas de Entrega</h2>
+        <form id="form-actas-entrega" class="form form-actas-compacta">
+          <h3>Datos Generales de la Entrega</h3>
+          <div class="form-inline form-inline-4">
+            <div class="form-row">
+              <label for="ent-fecha">Fecha</label>
+              <input type="date" id="ent-fecha" name="fecha" required>
+            </div>
+            <div class="form-row">
+              <label for="ent-acta">N° Acta de Entrega</label>
+              <input type="text" id="ent-acta" name="acta">
+            </div>
+            <div class="form-row">
+              <label for="ent-vacunador">Vacunador</label>
+              <select id="ent-vacunador" name="vacunador" required>
+                <option value="">Seleccionar</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label for="ent-entregador">Entregó</label>
+              <input type="text" id="ent-entregador" name="entregador" required list="dl-entregador">
+            </div>
+          </div>
+          <div class="form-inline form-inline-3">
+            <div class="form-row">
+              <label for="ent-num-desde">Actas de Vacunación (Desde)</label>
+              <input type="number" id="ent-num-desde" name="numDesde" min="0">
+            </div>
+            <div class="form-row">
+              <label for="ent-num-hasta">Actas de Vacunación (Hasta)</label>
+              <input type="number" id="ent-num-hasta" name="numHasta" min="0">
+            </div>
+            <div class="form-row">
+              <label for="ent-cant-actas">Cantidad de Actas</label>
+              <input type="number" id="ent-cant-actas" name="cantActas" min="0">
+            </div>
+          </div>
+          <hr>
+          <h3>Vacuna Aftosa</h3>
+          <div class="form-inline form-inline-5">
+            <div class="form-row">
+              <label for="ent-aft-dosis">Dosis</label>
+              <input type="number" id="ent-aft-dosis" name="aftDosis" min="0">
+            </div>
+            <div class="form-row">
+              <label for="ent-aft-frascos">Frascos</label>
+              <div style="display: flex; gap: 5px;">
+                <input type="number" id="ent-aft-frascos" name="aftFrascos" readonly class="readonly-input"
+                  style="flex: 1;">
+                <input type="number" id="ent-aft-dosis-frasco" name="aftDosisFrasco" placeholder="D/F"
+                  title="Dosis por Frasco" style="width: 60px;" value="125">
+              </div>
+            </div>
+            <div class="form-row">
+              <label for="ent-aft-marca">Marca</label>
+              <input type="text" id="ent-aft-marca" name="aftMarca" list="dl-aft-marca">
+            </div>
+            <div class="form-row">
+              <label for="ent-aft-serie">Serie</label>
+              <input type="text" id="ent-aft-serie" name="aftSerie" list="dl-aft-serie">
+            </div>
+            <div class="form-row">
+              <label for="ent-aft-venc">Vencimiento</label>
+              <input type="date" id="ent-aft-venc" name="aftVenc" list="dl-aft-venc">
+            </div>
+          </div>
+          <hr>
+          <h3>Vacuna Brucelosis</h3>
+          <div class="form-inline form-inline-5">
+            <div class="form-row">
+              <label for="ent-bru-dosis">Dosis</label>
+              <input type="number" id="ent-bru-dosis" name="bruDosis" min="0">
+            </div>
+            <div class="form-row">
+              <label for="ent-bru-frascos">Frascos</label>
+              <div style="display: flex; gap: 5px;">
+                <input type="number" id="ent-bru-frascos" name="bruFrascos" readonly class="readonly-input"
+                  style="flex: 1;">
+                <input type="number" id="ent-bru-dosis-frasco" name="bruDosisFrasco" placeholder="D/F"
+                  title="Dosis por Frasco" style="width: 60px;" value="10">
+              </div>
+            </div>
+            <div class="form-row">
+              <label for="ent-bru-marca">Marca</label>
+              <input type="text" id="ent-bru-marca" name="bruMarca" list="dl-bru-marca">
+            </div>
+            <div class="form-row">
+              <label for="ent-bru-serie">Serie</label>
+              <input type="text" id="ent-bru-serie" name="bruSerie" list="dl-bru-serie">
+            </div>
+            <div class="form-row">
+              <label for="ent-bru-venc">Vencimiento</label>
+              <input type="date" id="ent-bru-venc" name="bruVenc" list="dl-bru-venc">
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" id="btn-submit-entrega">Guardar acta de entrega</button>
+            <button type="button" id="btn-cancelar-entrega" class="secondary hidden">Cancelar edición</button>
+          </div>
+        </form>
+
+        <div class="filters-row" style="margin-top: 1rem;">
+          <input type="text" id="filtro-ent-acta" placeholder="N° Acta...">
+          <input type="date" id="filtro-ent-fecha-desde" title="Fecha Desde">
+          <input type="date" id="filtro-ent-fecha-hasta" title="Fecha Hasta">
+          <select id="filtro-ent-vacunador">
+            <option value="">Todos los vacunadores</option>
+          </select>
+        </div>
+
+        <div class="table-wrapper">
+          <table class="table" id="tabla-entregas">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Acta Entrega</th>
+                <th>Vacunador</th>
+                <th>Actas Vac. (Desde-Hasta)</th>
+                <th>Cant Actas</th>
+                <th>Aftosa (Dosis/Fr)</th>
+                <th>Brucelosis (Dosis/Fr)</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="tbody-entregas"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card section hidden sin-espacio-top" data-section="actas-recepcion">
+        <h2 class="hidden">Actas de Recepción</h2>
+        <form id="form-actas-recepcion" class="form form-actas-compacta">
+          <h3>Datos Generales de la Recepción (Devolución)</h3>
+          <div class="form-inline form-inline-4">
+            <div class="form-row">
+              <label for="rec-fecha">Fecha</label>
+              <input type="date" id="rec-fecha" name="fecha" required>
+            </div>
+            <div class="form-row">
+              <label for="rec-acta">N° Acta de Recepción</label>
+              <input type="text" id="rec-acta" name="acta">
+            </div>
+            <div class="form-row">
+              <label for="rec-vacunador">Vacunador</label>
+              <select id="rec-vacunador" name="vacunador" required>
+                <option value="">Seleccionar</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label for="rec-recibidor">Recibió</label>
+              <input type="text" id="rec-recibidor" name="recibidor" required list="dl-recibidor">
+            </div>
+          </div>
+
+          <div class="form-inline form-inline-3">
+            <div class="form-row">
+              <label for="rec-num-desde">Actas Devueltas (Desde)</label>
+              <input type="number" id="rec-num-desde" name="numDesde" min="0">
+            </div>
+            <div class="form-row">
+              <label for="rec-num-hasta">Actas Devueltas (Hasta)</label>
+              <input type="number" id="rec-num-hasta" name="numHasta" min="0">
+            </div>
+            <div class="form-row">
+              <label for="rec-cant-actas">Cantidad de Actas Devueltas</label>
+              <input type="number" id="rec-cant-actas" name="cantActas" min="0">
+            </div>
+          </div>
+
+          <hr>
+          <h3>Devolución Aftosa</h3>
+          <div class="form-inline form-inline-2">
+            <div class="form-row">
+              <label for="rec-aft-dosis">Dosis Devueltas</label>
+              <input type="number" id="rec-aft-dosis" name="aftDosis" min="0">
+            </div>
+            <div class="form-row">
+              <label for="rec-aft-frascos">Frascos Vacíos</label>
+              <input type="number" id="rec-aft-frascos" name="aftFrascos" min="0" value="0">
+            </div>
+          </div>
+
+          <hr>
+          <h3>Devolución Brucelosis</h3>
+          <div class="form-inline form-inline-2">
+            <div class="form-row">
+              <label for="rec-bru-dosis">Dosis Devueltas</label>
+              <input type="number" id="rec-bru-dosis" name="bruDosis" min="0">
+            </div>
+            <div class="form-row">
+              <label for="rec-bru-frascos">Frascos Vacíos</label>
+              <input type="number" id="rec-bru-frascos" name="bruFrascos" min="0" value="0">
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" id="btn-submit-recepcion">Guardar acta de recepción</button>
+            <button type="button" id="btn-cancelar-recepcion" class="secondary hidden">Cancelar edición</button>
+          </div>
+        </form>
+
+        <div class="filters-row" style="margin-top: 1rem;">
+          <input type="text" id="filtro-rec-acta" placeholder="N° Acta...">
+          <input type="date" id="filtro-rec-fecha-desde" title="Fecha Desde">
+          <input type="date" id="filtro-rec-fecha-hasta" title="Fecha Hasta">
+          <select id="filtro-rec-vacunador">
+            <option value="">Todos los vacunadores</option>
+          </select>
+        </div>
+
+        <div class="table-wrapper">
+          <table class="table" id="tabla-recepciones">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Acta Recepción</th>
+                <th>Vacunador</th>
+                <th>Actas Devueltas</th>
+                <th>Aftosa (Dosis/Fr)</th>
+                <th>Brucelosis (Dosis/Fr)</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="tbody-recepciones"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card section hidden" data-section="informes">
+        <h2>Informe Global de Vacunas</h2>
+
+        <div class="filters-row mb-4"
+          style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:1rem;">
+          <label for="filtro-informe-desde">Desde:</label>
+          <input type="date" id="filtro-informe-desde">
+
+          <label for="filtro-informe-hasta">Hasta:</label>
+          <input type="date" id="filtro-informe-hasta">
+
+          <button type="button" id="btn-generar-informe" class="primary">Generar Informe</button>
+        </div>
+
+        <div class="table-wrapper mb-4">
+          <h3>Resumen Global (por vacuna)</h3>
+          <table class="table" id="tabla-informe-global">
+            <thead>
+              <tr>
+                <th>Vacuna</th>
+                <th>Compradas</th>
+                <th>Recepcionadas</th>
+                <th>En Proveedor</th>
+                <th>En Heladera</th>
+                <th>Entregadas</th>
+                <th>Devueltas</th>
+                <th>Aplicadas</th>
+                <th>Stock Vacunadores</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-informe-global">
+              <tr>
+                <td colspan="7" class="helper-text" style="text-align:center;">Seleccione un rango de fechas y haga clic
+                  en Generar Informe.</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="grid-2 mt-3 no-print">
+            <div class="card summary-box" style="padding:10px; background:var(--bg-card); text-align:center;">
+              <h5 style="margin:0;">Establecimientos Únicos (RAIZ)</h5>
+              <p style="font-size: 1.5rem; color: #1565c0; margin:0;"><strong id="gral-unicos-renspa">0</strong></p>
+            </div>
+            <div class="card summary-box" style="padding:10px; background:var(--bg-card); text-align:center;">
+              <h5 style="margin:0;">Unidades Productivas Totales (FULL)</h5>
+              <p style="font-size: 1.5rem; color: #e65100; margin:0;"><strong id="gral-unicos-up">0</strong></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-wrapper mb-4">
+          <h3>Total Vacunado por Categoría</h3>
+          <table class="table" id="tabla-informe-categorias">
+            <thead>
+              <tr>
+                <th>Vacuna</th>
+                <th>Vacas</th>
+                <th>Toros</th>
+                <th>Vaquillonas</th>
+                <th>Novillos</th>
+                <th>Novillitos</th>
+                <th>Toritos</th>
+                <th>Terneras</th>
+                <th>Terneros</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-informe-categorias">
+              <tr>
+                <td colspan="10" class="helper-text" style="text-align:center;">Haga clic en Generar Informe.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="grid-2 mb-4">
+          <div class="table-wrapper">
+            <h3>Total Vacunado por Departamento</h3>
+            <table class="table" id="tabla-informe-departamentos">
+              <thead>
+                <tr>
+                  <th>Departamento</th>
+                  <th>Total Aftosa</th>
+                  <th>Total Brucelosis</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-informe-departamentos">
+                <tr>
+                  <td colspan="3" class="helper-text" style="text-align:center;">Haga clic en Generar Informe.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="table-wrapper">
+            <h3>Total Vacunado por Vacunador</h3>
+            <table class="table" id="tabla-informe-vacunadores">
+              <thead>
+                <tr>
+                  <th rowspan="2">Vacunador</th>
+                  <th colspan="2">Entregado</th>
+                  <th colspan="2">Aplicado</th>
+                  <th colspan="2">Devuelto</th>
+                  <th colspan="2">Stock en Mano</th>
+                </tr>
+                <tr>
+                  <th>Aftosa</th>
+                  <th>Bruc.</th>
+                  <th>Aftosa</th>
+                  <th>Bruc.</th>
+                  <th>Aftosa</th>
+                  <th>Bruc.</th>
+                  <th>Aftosa</th>
+                  <th>Bruc.</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-informe-vacunadores">
+                <tr>
+                  <td colspan="5" class="helper-text" style="text-align:center;">Haga clic en Generar Informe.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <h3>Control de Vencimientos</h3>
+          <table class="table" id="tabla-informe-vencimientos">
+            <thead>
+              <tr>
+                <th>Vacuna</th>
+                <th>Marca</th>
+                <th>Serie/Lote</th>
+                <th>Vencimiento</th>
+                <th>Diferencia (Días)</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-informe-vencimientos">
+              <tr>
+                <td colspan="5" class="helper-text" style="text-align:center;">Haga clic en Generar Informe.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <hr class="mt-4 mb-4">
+        <h2>Informe de Campaña</h2>
+        <div class="filters-row mb-4" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+          <label for="filtro-campania-inicio">Fecha Inicio:</label>
+          <input type="date" id="filtro-campania-inicio">
+          <label for="filtro-campania-fin">Fecha Fin:</label>
+          <input type="date" id="filtro-campania-fin">
+          <button type="button" id="btn-generar-campania" class="primary">Generar Informe de Campaña</button>
+        </div>
+
+        <div class="table-wrapper mb-4">
+          <h3>Stock Inicial (a la Fecha de Inicio)</h3>
+          <table class="table" id="tabla-campania-inicial">
+            <thead>
+              <tr>
+                <th>Lugar</th>
+                <th>Dosis Aftosa</th>
+                <th>Dosis Brucelosis</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-campania-inicial">
+              <tr>
+                <td colspan="3" class="helper-text" style="text-align:center;">Seleccione las fechas y genere el
+                  informe.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-wrapper mb-4">
+          <h3>Stock Final (a la Fecha de Fin)</h3>
+          <table class="table" id="tabla-campania-final">
+            <thead>
+              <tr>
+                <th>Lugar</th>
+                <th>Dosis Aftosa</th>
+                <th>Dosis Brucelosis</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-campania-final">
+              <tr>
+                <td colspan="3" class="helper-text" style="text-align:center;">Seleccione las fechas y genere el
+                  informe.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="grid-2 mb-4">
+          <div class="card summary-box" style="padding:15px; background:var(--bg-card); text-align:center;">
+            <h4 style="margin-top:0;">Establecimientos Únicos (RENSPA raíz)</h4>
+            <p style="font-size: 2rem; color: #1565c0; margin-bottom: 0;"><strong
+                id="campania-establecimientos">0</strong>
+            </p>
+          </div>
+          <div class="card summary-box" style="padding:15px; background:var(--bg-card); text-align:center;">
+            <h4 style="margin-top:0;">Unidades Productivas Totales (RENSPA exacto)</h4>
+            <p style="font-size: 2rem; color: #e65100; margin-bottom: 0;"><strong id="campania-ups">0</strong></p>
+          </div>
+        </div>
+
+        <hr class="mt-4 mb-4">
+        <h2>Reportes de Clientes</h2>
+
+        <div class="table-wrapper mb-4" id="contenedor-cli-sin-vac">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h3>Clientes Sin Vacunación Registrada</h3>
+            <button type="button" class="secondary no-print" onclick="window.print()">Imprimir Listado</button>
+          </div>
+          <div class="filters-row mb-3 no-print" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <label for="filtro-cli-sin-vac-desde">Desde:</label>
+            <input type="date" id="filtro-cli-sin-vac-desde">
+            <label for="filtro-cli-sin-vac-hasta">Hasta:</label>
+            <input type="date" id="filtro-cli-sin-vac-hasta">
+            <input type="text" id="filtro-cli-sin-vac-renspa" placeholder="Filtrar RENSPA...">
+            <input type="text" id="filtro-cli-sin-vac-nombre" placeholder="Filtrar Nombre...">
+            <button type="button" id="btn-generar-cli-sin-vac" class="primary">Generar Listado Sin Vacunar</button>
+          </div>
+          <table class="table" id="tabla-informe-cli-sin-vac">
+            <thead>
+              <tr>
+                <th>N° RENSPA / UP</th>
+                <th>Nombre</th>
+                <th>DNI / CUIT</th>
+                <th>Establecimiento</th>
+                <th>Localidad</th>
+                <th>Departamento</th>
+                <th>Vacunador</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-informe-cli-sin-vac">
+              <tr>
+                <td colspan="7" class="helper-text" style="text-align:center;">Haga clic en Generar Listado.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-wrapper">
+          <h3>Listado de Clientes Vacunados</h3>
+          <div class="filters-row mb-3" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <label for="filtro-cli-vac-campania">Campaña (Período):</label>
+            <select id="filtro-cli-vac-campania">
+              <option value="">Todas</option>
+              <option value="1P">1° Período</option>
+              <option value="2P">2° Período</option>
+            </select>
+            <label for="filtro-cli-vac-anio">Año:</label>
+            <input type="number" id="filtro-cli-vac-anio" min="2000" max="2100" placeholder="Ej. 2024">
+
+            <label for="filtro-cli-vac-desde">Desde:</label>
+            <input type="date" id="filtro-cli-vac-desde">
+            <label for="filtro-cli-vac-hasta">Hasta:</label>
+            <input type="date" id="filtro-cli-vac-hasta">
+
+            <input type="text" id="filtro-cli-vac-busqueda" placeholder="Buscar por Nombre o RENSPA...">
+            <button type="button" id="btn-generar-cli-vac" class="primary">Filtrar Vacunados</button>
+          </div>
+          <table class="table" id="tabla-informe-cli-vac">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Acta</th>
+                <th>N° RENSPA / UP</th>
+                <th>Nombre</th>
+                <th>Establecimiento</th>
+                <th>Vacunador</th>
+                <th>Total Aftosa</th>
+                <th>Terneras Bruc.</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-informe-cli-vac">
+              <tr>
+                <td colspan="8" class="helper-text" style="text-align:center;">Haga clic en Filtrar Vacunados.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <hr class="mt-4 mb-4">
+        <h2>Reportes Detallados por Vacunador</h2>
+        <div class="filters-row mb-4" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+          <label for="filtro-det-vac-desde">Desde:</label>
+          <input type="date" id="filtro-det-vac-desde">
+          <label for="filtro-det-vac-hasta">Hasta:</label>
+          <input type="date" id="filtro-det-vac-hasta">
+          <label for="filtro-det-vac-vacunador">Vacunador:</label>
+          <select id="filtro-det-vac-vacunador">
+            <option value="">Seleccionar vacunador</option>
+          </select>
+          <button type="button" id="btn-generar-det-vac" class="primary">Generar Informe Detallado</button>
+          <button type="button" class="secondary no-print" onclick="window.print()">Imprimir Informe</button>
+        </div>
+
+        <div id="resultado-det-vac" class="hidden">
+          <div class="table-wrapper mb-4">
+            <h3>Control de Dosis (Físico)</h3>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Vacuna</th>
+                  <th>Dosis Entregadas</th>
+                  <th>Dosis Aplicadas</th>
+                  <th>Dosis Devueltas</th>
+                  <th>Stock Actual</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-det-vac-dosis"></tbody>
+            </table>
+          </div>
+
+          <div class="table-wrapper mb-4">
+            <h3>Control de Actas</h3>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Concepto</th>
+                  <th>Detalle / Cantidad</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-det-vac-actas"></tbody>
+            </table>
+          </div>
+
+          <div class="table-wrapper mb-4">
+            <h3>Actas Anuladas y Sin Uso</h3>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>N° Acta</th>
+                  <th>Estado</th>
+                  <th>Observaciones</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-det-vac-anuladas"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="card section hidden" data-section="finanzas">
+        <h2>Finanzas y Recaudación Global</h2>
+
+        <div class="filters-row mb-4"
+          style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:1rem;">
+          <label for="filtro-finanzas-desde">Desde:</label>
+          <input type="date" id="filtro-finanzas-desde">
+
+          <label for="filtro-finanzas-hasta">Hasta:</label>
+          <input type="date" id="filtro-finanzas-hasta">
+
+          <label for="filtro-finanzas-factura">N° Factura:</label>
+          <input type="text" id="filtro-finanzas-factura" placeholder="Factura..." style="width: 120px;">
+
+          <label for="filtro-finanzas-acta">N° Acta:</label>
+          <input type="text" id="filtro-finanzas-acta" placeholder="Acta..." style="width: 100px;">
+
+          <label for="filtro-finanzas-renspa">RENSPA:</label>
+          <input type="text" id="filtro-finanzas-renspa" placeholder="RENSPA..." style="width: 150px;">
+
+          <label for="filtro-finanzas-cheque">N° Cheque:</label>
+          <input type="text" id="filtro-finanzas-cheque" placeholder="Cheque..." style="width: 100px;">
+
+          <label for="filtro-finanzas-fec-cobro-desde">F. Cobro Desde:</label>
+          <input type="date" id="filtro-finanzas-fec-cobro-desde" style="width: 130px;">
+
+          <label for="filtro-finanzas-fec-cobro-hasta">Hasta:</label>
+          <input type="date" id="filtro-finanzas-fec-cobro-hasta" style="width: 130px;">
+
+
+          <button type="button" id="btn-generar-finanzas" class="primary">Generar Informe de Finanzas</button>
+          <button type="button" id="btn-limpiar-finanzas" class="secondary">Limpiar Filtros</button>
+          <button type="button" id="btn-imprimir-finanzas" class="secondary" onclick="window.print()">Imprimir
+            Informe</button>
+        </div>
+
+        <div class="table-wrapper mb-4">
+          <div class="card summary-box"
+            style="padding:15px; background:var(--bg-card); text-align:center; max-width: 400px; margin: 0 auto;">
+            <h3 style="margin-top:0;">Total Cobrado</h3>
+            <p style="font-size: 2rem; color: #2e7d32; margin-bottom: 0;"><strong
+                id="finanzas-total-general">$0.00</strong>
+            </p>
+          </div>
+        </div>
+
+        <hr>
+
+        <div class="finanzas-grid mb-4">
+          <div class="card summary-box" style="padding:15px; background:var(--bg-card);">
+            <h4 style="margin-top:0;">Efectivo</h4>
+            <p style="font-size: 1.5rem; color: #1565c0;"><strong id="finanzas-total-efectivo">$0.00</strong></p>
+            <button type="button" class="btn-large" style="padding: 10px; font-size: 0.9rem;"
+              onclick="imprimirCobrosPorForma('efectivo')">🖨️ Imprimir Efectivo</button>
+          </div>
+          <div class="table-wrapper">
+            <table class="table" id="tabla-finanzas-efectivo">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>N° Acta</th>
+                  <th>N° Factura</th>
+                  <th>Renspa</th>
+                  <th>Nombre</th>
+                  <th>Destino</th>
+                  <th>Importe</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="tbody-finanzas-efectivo">
+                <tr>
+                  <td colspan="8" class="helper-text" style="text-align:center;">Generar Informe para ver el detalle.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <hr>
+
+        <div class="finanzas-grid mb-4">
+          <div class="card summary-box" style="padding:15px; background:var(--bg-card);">
+            <h4 style="margin-top:0;">Cheques</h4>
+            <p style="font-size: 1.5rem; color: #1565c0;"><strong id="finanzas-total-cheques">$0.00</strong></p>
+            <button type="button" class="btn-large" style="padding: 10px; font-size: 0.9rem;"
+              onclick="imprimirCobrosPorForma('cheque')">🖨️ Imprimir Cheques</button>
+          </div>
+          <div class="table-wrapper">
+            <table class="table" id="tabla-finanzas-cheques">
+              <thead>
+                <tr>
+                  <th>Fecha Cobro</th>
+                  <th>N° Acta</th>
+                  <th>N° Factura</th>
+                  <th>Renspa</th>
+                  <th>Nombre</th>
+                  <th>Banco</th>
+                  <th>N° Cheque</th>
+                  <th>Fecha del cheque</th>
+                  <th>Fecha de cobro</th>
+                  <th>Destino</th>
+                  <th>Importe</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="tbody-finanzas-cheques">
+                <tr>
+                  <td colspan="12" class="helper-text" style="text-align:center;">Generar Informe para ver el detalle.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <hr>
+
+        <div class="finanzas-grid mb-4">
+          <div class="card summary-box" style="padding:15px; background:var(--bg-card);">
+            <h4 style="margin-top:0;">Transferencias</h4>
+            <p style="font-size: 1.5rem; color: #1565c0;"><strong id="finanzas-total-transferencias">$0.00</strong></p>
+            <button type="button" class="btn-large" style="padding: 10px; font-size: 0.9rem;"
+              onclick="imprimirCobrosPorForma('transferencia')">🖨️ Imprimir Transf.</button>
+          </div>
+          <div class="table-wrapper">
+            <table class="table" id="tabla-finanzas-transferencias">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>N° Acta</th>
+                  <th>N° Factura</th>
+                  <th>Renspa</th>
+                  <th>Nombre</th>
+                  <th>N° Transferencia</th>
+                  <th>Banco Origen</th>
+                  <th>Destino</th>
+                  <th>Importe</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="tbody-finanzas-transferencias">
+                <tr>
+                  <td colspan="10" class="helper-text" style="text-align:center;">Generar Informe para ver el detalle.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <hr>
+
+        <div class="table-wrapper mb-4">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
+            <h3 style="margin: 0;">Rendiciones Consolidadas</h3>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <input type="text" id="filtro-rendiciones-texto" placeholder="Buscar N° Rendición..."
+                style="font-size: 0.8rem; padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 4px;">
+              <div
+                style="font-size: 1.1rem; font-weight: bold; padding: 5px 10px; background-color: #e3f2fd; border-radius: 4px; white-space: nowrap;">
+                Neto General: <span id="finanzas-neto-rendiciones" style="color: #1565c0;">$0.00</span>
+              </div>
+            </div>
+          </div>
+          <table class="table" id="tabla-finanzas-rendiciones">
+            <thead>
+              <tr>
+                <th>N° Rend.</th>
+                <th>Subtotal Cobros</th>
+                <th>Subtotal Pagos (Vacunador)</th>
+                <th>Importe Neto</th>
+                <th style="width: 80px;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-finanzas-rendiciones">
+              <tr>
+                <td colspan="5" class="helper-text" style="text-align:center;">Generar Informe para ver las rendiciones
+                  consolidadas.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </section>
+
+      <datalist id="dl-entregador"></datalist>
+      <datalist id="dl-recibidor"></datalist>
+      <section class="card section hidden" data-section="backup">
+        <h2 style="color:var(--primary); display:flex; align-items:center; gap:10px;">
+          <span class="icon">💾</span> Backup, Portabilidad y Guardado Permanente
+        </h2>
+        <div class="backup-container">
+          <div class="alert-info"
+            style="border-left:5px solid var(--primary); background:#e3f2fd; padding:15px; border-radius:4px; margin-bottom:20px;">
+            <p><strong>¿Cómo funciona el guardado?</strong></p>
+            <p>• Los cambios se guardan <strong>automáticamente</strong> en este navegador.</p>
+            <p>• Para mayor seguridad, usa el botón azul de abajo para descargar un archivo de respaldo (Backup).</p>
+            <p>• <strong>Importante:</strong> Este archivo es lo que necesitas para llevar tus datos a otra computadora.
+            </p>
+          </div>
+
+          <div class="backup-actions" style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+            <div class="backup-box"
+              style="border:2px solid var(--primary); padding:20px; border-radius:8px; text-align:center; background:white;">
+              <h3 style="margin-top:0; color:var(--primary);">1. GUARDAR / EXPORTAR</h3>
+              <p>Presiona aquí para descargar una copia de seguridad en tu carpeta de <strong>Descargas</strong>.</p>
+              <button type="button" id="btn-exportar-datos" class="btn-large"
+                style="width:100%; padding:15px; font-size:1.1rem; background:var(--primary); color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold;">
+                💾 GUARDAR TODO Y DESCARGAR RESPALDO
+              </button>
+            </div>
+
+            <div class="backup-box"
+              style="border:2px solid #666; padding:20px; border-radius:8px; text-align:center; background:#f9f9f9;">
+              <h3 style="margin-top:0; color:#333;">2. RECUPERAR / IMPORTAR</h3>
+              <p>Usa esto solo si quieres cargar datos desde un archivo guardado anteriormente.</p>
+              <input type="file" id="input-importar-datos" accept=".json" style="display:none;">
+              <button type="button" id="btn-importar-datos" class="btn-large btn-alt"
+                style="width:100%; padding:15px; font-size:1.1rem; border-radius:5px; cursor:pointer; font-weight:bold;">
+                📂 SELECCIONAR Y RECUPERAR ARCHIVO
+              </button>
+              <p class="helper-text warning-text" style="color:#d32f2f; font-size:0.85rem; margin-top:10px;">
+                ⚠️ ¡CUIDADO! Esto borrará los datos actuales y los reemplazará por los del archivo.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="api-service.js" defer></script>
+  <script src="app.js?v=8" defer></script>
+  <script>
+    (function () {
+      if (window.__tabsFallbackInit) return;
+      window.__tabsFallbackInit = true;
+      var buttons = document.querySelectorAll('.nav-button');
+      var sections = document.querySelectorAll('.section');
+      function activar(sectionName) {
+        for (var i = 0; i < sections.length; i++) {
+          var s = sections[i];
+          if (s.getAttribute('data-section') === sectionName) {
+            s.classList.remove('hidden');
+          } else {
+            s.classList.add('hidden');
+          }
+        }
+        for (var j = 0; j < buttons.length; j++) {
+          var b = buttons[j];
+          if (b.getAttribute('data-section') === sectionName) {
+            b.classList.add('active');
+          } else {
+            b.classList.remove('active');
+          }
+        }
+      }
+      for (var k = 0; k < buttons.length; k++) {
+        buttons[k].addEventListener('click', function (ev) {
+          var sec = ev.currentTarget.getAttribute('data-section');
+          activar(sec);
+        });
+      }
+    })();
+  </script>
+
+  <!-- Modal Detalle de Rendición -->
+  <div id="modal-detalle-rendicion" class="modal hidden">
+    <div class="modal-content" style="max-width: 900px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2 id="modal-rend-titulo" style="margin:0;">Detalle de Rendición</h2>
+        <button type="button" class="btn-close-modal" onclick="cerrarModalRendicion()">×</button>
+      </div>
+      <hr>
+      <div id="modal-rend-body">
+        <!-- Contenido dinámico -->
+      </div>
+      <div style="margin-top:20px; display:flex; justify-content:flex-end; gap:10px;">
+        <button type="button" class="btn" onclick="window.print()">Imprimir</button>
+        <button type="button" class="btn btn-alt" onclick="cerrarModalRendicion()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <datalist id="dl-destinos"></datalist>
+</body>
+
+</html>
