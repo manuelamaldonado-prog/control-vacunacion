@@ -6,6 +6,23 @@
   <title>Control de Vacunación</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="styles.css?v=8">
+  <style>
+    /* User UI adjustment: Force table to fit screen width and show action buttons without scrolling */
+    #tabla-clientes { table-layout: fixed; width: 100%; }
+    #tabla-clientes th, #tabla-clientes td {
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    #tabla-clientes th:nth-child(1) { width: 10%; }
+    #tabla-clientes th:nth-child(2) { width: 15%; }
+    #tabla-clientes th:nth-child(3) { width: 10%; }
+    #tabla-clientes th:nth-child(4) { width: 12%; }
+    #tabla-clientes th:nth-child(5) { width: 12%; }
+    #tabla-clientes th:nth-child(6) { width: 12%; }
+    #tabla-clientes th:nth-child(7) { width: 10%; }
+    #tabla-clientes th:nth-child(8) { width: 10%; }
+    /* Actions column explicitly permitted to display contents fully */
+    #tabla-clientes th:nth-child(9), #tabla-clientes td:nth-child(9) { width: 9%; text-align: center; white-space: nowrap; overflow: visible; }
+  </style>
 </head>
 
 <body>
@@ -598,7 +615,7 @@
           <div class="form-inline form-inline-6">
             <div class="form-row">
               <label for="vac-fecha">Fecha</label>
-              <input id="vac-fecha" name="fecha" type="date" required>
+              <input id="vac-fecha" name="fecha" type="date">
             </div>
             <div class="form-row">
               <label for="vac-acta">N° de acta</label>
@@ -613,7 +630,7 @@
             </div>
             <div class="form-row">
               <label for="vac-anio">Año</label>
-              <input type="number" id="vac-anio" name="anio" min="2000" max="2100" required>
+              <input type="number" id="vac-anio" name="anio" min="2000" max="2100">
             </div>
             <div class="form-row">
               <label for="vac-periodo">Período</label>
@@ -634,7 +651,7 @@
           <div class="form-row form-proveedor-inline">
             <div>
               <label for="vac-renspa">RENSPA</label>
-              <input id="vac-renspa" name="renspa" type="text" list="dl-cli-renspa" required>
+              <input id="vac-renspa" name="renspa" type="text" list="dl-cli-renspa">
             </div>
             <div>
               <label for="vac-nombre-cli">Nombre</label>
@@ -651,6 +668,12 @@
             <div>
               <label for="vac-departamento-cli">Departamento</label>
               <input id="vac-departamento-cli" name="departamentoCli" type="text" readonly>
+            </div>
+            <div>
+              <label for="vac-vacunador">Vacunador</label>
+              <select id="vac-vacunador" name="vacunador">
+                <option value="">Seleccionar vacunador</option>
+              </select>
             </div>
           </div>
           <h3>Detalle de vacunación aftosa</h3>
@@ -697,7 +720,6 @@
                   <th>Terneras</th>
                   <th>Marca vacuna brucelosis</th>
                   <th>Serie vacuna brucelosis</th>
-                  <th>Vacunador</th>
                 </tr>
               </thead>
               <tbody>
@@ -705,11 +727,6 @@
                   <td><input id="bru-terneras" name="bruTerneras" type="number" min="0" step="1"></td>
                   <td><input id="bru-marca" name="bruMarca" type="text" list="dl-bru-marca"></td>
                   <td><input id="bru-serie" name="bruSerie" type="text" list="dl-bru-serie"></td>
-                  <td>
-                    <select id="vac-vacunador" name="vacunador">
-                      <option value="">Seleccionar vacunador</option>
-                    </select>
-                  </td>
                 </tr>
               </tbody>
             </table>
@@ -1906,81 +1923,112 @@
         </div>
 
         <hr class="mt-4 mb-4">
-        <h2>Reportes de Clientes</h2>
-
-        <div class="table-wrapper mb-4" id="contenedor-cli-sin-vac">
+        <h2>Reporte General de Clientes</h2>
+        
+        <div class="table-wrapper mb-4" id="contenedor-cli-gral">
           <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h3>Clientes Sin Vacunación Registrada</h3>
+            <h3>Filtro Avanzado</h3>
             <button type="button" class="secondary no-print" onclick="window.print()">Imprimir Listado</button>
           </div>
-          <div class="filters-row mb-3 no-print" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-            <label for="filtro-cli-sin-vac-desde">Desde:</label>
-            <input type="date" id="filtro-cli-sin-vac-desde">
-            <label for="filtro-cli-sin-vac-hasta">Hasta:</label>
-            <input type="date" id="filtro-cli-sin-vac-hasta">
-            <input type="text" id="filtro-cli-sin-vac-renspa" placeholder="Filtrar RENSPA...">
-            <input type="text" id="filtro-cli-sin-vac-nombre" placeholder="Filtrar Nombre...">
-            <button type="button" id="btn-generar-cli-sin-vac" class="primary">Generar Listado Sin Vacunar</button>
+          
+          <div class="filters-row mb-3 no-print" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; background-color: var(--bg-hover); padding: 15px; border-radius: 8px;">
+            <div style="display:flex; flex-direction:column; gap:4px;">
+              <label for="filtro-cli-gral-vacunado" style="font-size:0.8rem;">¿Vacunado?</label>
+              <select id="filtro-cli-gral-vacunado">
+                <option value="todos">Todos</option>
+                <option value="si">Sí</option>
+                <option value="no">No</option>
+              </select>
+            </div>
+            
+            <div style="display:flex; flex-direction:column; gap:4px;">
+              <label for="filtro-cli-gral-campania" style="font-size:0.8rem;">Campaña:</label>
+              <select id="filtro-cli-gral-campania">
+                <option value="">Todas</option>
+                <option value="1P">1° Período</option>
+                <option value="2P">2° Período</option>
+              </select>
+            </div>
+            
+            <div style="display:flex; flex-direction:column; gap:4px;">
+              <label for="filtro-cli-gral-anio" style="font-size:0.8rem;">Año:</label>
+              <input type="number" id="filtro-cli-gral-anio" min="2000" max="2100" placeholder="Ej. 2024" style="width:80px;">
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:4px;">
+              <label for="filtro-cli-gral-desde" style="font-size:0.8rem;">Desde:</label>
+              <input type="date" id="filtro-cli-gral-desde">
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:4px;">
+              <label for="filtro-cli-gral-hasta" style="font-size:0.8rem;">Hasta:</label>
+              <input type="date" id="filtro-cli-gral-hasta">
+            </div>
+            
+            <div style="display:flex; flex-direction:column; gap:4px;">
+              <label for="filtro-cli-gral-acta" style="font-size:0.8rem;">N° Acta:</label>
+              <input type="text" id="filtro-cli-gral-acta" placeholder="Parte del acta..." style="width:120px;">
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:4px;">
+              <label for="filtro-cli-gral-vacunador" style="font-size:0.8rem;">Vacunador:</label>
+              <select id="filtro-cli-gral-vacunador">
+                <option value="">Cualquiera</option>
+              </select>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:4px;">
+              <label for="filtro-cli-gral-departamento" style="font-size:0.8rem;">Departamento:</label>
+              <input type="text" id="filtro-cli-gral-departamento" placeholder="Filtro dpto..." style="width:110px;">
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:4px;">
+              <label style="font-size:0.8rem;">Cabezas Aftosa:</label>
+              <div style="display:flex; gap:5px;">
+                <input type="number" id="filtro-cli-gral-cabezas-min" min="0" placeholder="Min" style="width:60px;" title="Desde">
+                <input type="number" id="filtro-cli-gral-cabezas-max" min="0" placeholder="Max" style="width:60px;" title="Hasta">
+              </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:4px;">
+              <label for="filtro-cli-gral-busqueda" style="font-size:0.8rem;">Búsqueda (Nombre/RENSPA):</label>
+              <input type="text" id="filtro-cli-gral-busqueda" placeholder="Buscar..." style="width:160px;">
+            </div>
+
+            <div style="display:flex; align-items:flex-end; padding-bottom:2px;">
+              <button type="button" id="btn-generar-cli-gral" class="primary" style="height:38px;">Generar Reporte Unificado</button>
+            </div>
           </div>
-          <table class="table" id="tabla-informe-cli-sin-vac">
+          
+          <table class="table" id="tabla-informe-cli-gral">
             <thead>
               <tr>
-                <th>N° RENSPA / UP</th>
+                <th>N° RENSPA / CUIT</th>
                 <th>Nombre</th>
-                <th>DNI / CUIT</th>
                 <th>Establecimiento</th>
-                <th>Localidad</th>
                 <th>Departamento</th>
-                <th>Vacunador</th>
-              </tr>
-            </thead>
-            <tbody id="tbody-informe-cli-sin-vac">
-              <tr>
-                <td colspan="7" class="helper-text" style="text-align:center;">Haga clic en Generar Listado.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="table-wrapper">
-          <h3>Listado de Clientes Vacunados</h3>
-          <div class="filters-row mb-3" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-            <label for="filtro-cli-vac-campania">Campaña (Período):</label>
-            <select id="filtro-cli-vac-campania">
-              <option value="">Todas</option>
-              <option value="1P">1° Período</option>
-              <option value="2P">2° Período</option>
-            </select>
-            <label for="filtro-cli-vac-anio">Año:</label>
-            <input type="number" id="filtro-cli-vac-anio" min="2000" max="2100" placeholder="Ej. 2024">
-
-            <label for="filtro-cli-vac-desde">Desde:</label>
-            <input type="date" id="filtro-cli-vac-desde">
-            <label for="filtro-cli-vac-hasta">Hasta:</label>
-            <input type="date" id="filtro-cli-vac-hasta">
-
-            <input type="text" id="filtro-cli-vac-busqueda" placeholder="Buscar por Nombre o RENSPA...">
-            <button type="button" id="btn-generar-cli-vac" class="primary">Filtrar Vacunados</button>
-          </div>
-          <table class="table" id="tabla-informe-cli-vac">
-            <thead>
-              <tr>
-                <th>Fecha</th>
-                <th>Acta</th>
-                <th>N° RENSPA / UP</th>
-                <th>Nombre</th>
-                <th>Establecimiento</th>
-                <th>Vacunador</th>
                 <th>Total Aftosa</th>
-                <th>Terneras Bruc.</th>
+                <th>Total Brucelosis</th>
+                <th>Acta(s)</th>
+                <th>Vacunador(es)</th>
               </tr>
             </thead>
-            <tbody id="tbody-informe-cli-vac">
+            <tbody id="tbody-informe-cli-gral">
               <tr>
-                <td colspan="8" class="helper-text" style="text-align:center;">Haga clic en Filtrar Vacunados.</td>
+                <td colspan="8" class="helper-text" style="text-align:center;">Configure los filtros y presione Generar.</td>
               </tr>
             </tbody>
           </table>
+          <div class="grid-2 mt-3 no-print">
+            <div class="card summary-box" style="padding:10px; background:var(--bg-card); text-align:center;">
+              <h5 style="margin:0;">Total Registros Encontrados</h5>
+              <p style="font-size: 1.5rem; color: #1565c0; margin:0;"><strong id="gral-cli-total-reg">0</strong></p>
+            </div>
+            <div class="card summary-box" style="padding:10px; background:var(--bg-card); text-align:center;">
+              <h5 style="margin:0;">Total Cabezas Aftosa (Aproximado)</h5>
+              <p style="font-size: 1.5rem; color: #e65100; margin:0;"><strong id="gral-cli-total-cabezas">0</strong></p>
+            </div>
+          </div>
         </div>
 
         <hr class="mt-4 mb-4">
@@ -2277,7 +2325,7 @@
     </main>
   </div>
   <script src="api-service.js" defer></script>
-  <script src="app.js?v=8" defer></script>
+  <script src="app_v24.js" defer></script>
   <script>
     (function () {
       if (window.__tabsFallbackInit) return;

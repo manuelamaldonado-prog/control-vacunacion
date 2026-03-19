@@ -1500,7 +1500,6 @@ function renderProveedores() {
     `;
     tbody.appendChild(tr);
   });
-  actualizarFiltroProveedores();
 }
 
 function aplicarValoresPorDefectoCliente() {
@@ -6890,6 +6889,7 @@ function quitarLoteCompra(index) {
 }
 
 function initialize() {
+  try {
   cargarDesdeStorage();
 
   if (vacunadores.length > 0) {
@@ -6976,6 +6976,10 @@ function initialize() {
       });
       renderFinanzasGlobales();
     });
+  }
+  } catch (err) {
+    alert("ERROR CRÍTICO AL INICIAR: " + err.message + "\nLínea: " + err.lineNumber + "\n\nPasale captura completa de este cartel al programador.");
+    console.error(err);
   }
 }
 

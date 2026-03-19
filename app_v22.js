@@ -391,7 +391,7 @@ let movimientoEditandoId = null;
 let movimientoEditandoTipo = null;
 let clienteEditandoId = null;
 let vacunacionEditandoId = null;
-let ultimaProvinciaCliente = "";
+let ultimaProvinciaCliente = "SANTIAGO DEL ESTERO";
 const filtros = {
   fechaDesde: "",
   fechaHasta: "",
@@ -1500,7 +1500,6 @@ function renderProveedores() {
     `;
     tbody.appendChild(tr);
   });
-  actualizarFiltroProveedores();
 }
 
 function aplicarValoresPorDefectoCliente() {
@@ -1508,9 +1507,10 @@ function aplicarValoresPorDefectoCliente() {
   if (!form) return;
   if (!ultimaProvinciaCliente && clientes.length) {
     const ultimo = clientes[clientes.length - 1];
-    ultimaProvinciaCliente = ultimo.provincia || "";
+    ultimaProvinciaCliente = ultimo.provincia || "SANTIAGO DEL ESTERO";
   }
-  if (ultimaProvinciaCliente && !form.provincia.value) {
+  if (!ultimaProvinciaCliente) ultimaProvinciaCliente = "SANTIAGO DEL ESTERO";
+  if (!form.provincia.value) {
     form.provincia.value = ultimaProvinciaCliente;
   }
 }
@@ -6890,6 +6890,7 @@ function quitarLoteCompra(index) {
 }
 
 function initialize() {
+  try {
   cargarDesdeStorage();
 
   if (vacunadores.length > 0) {
@@ -6976,6 +6977,10 @@ function initialize() {
       });
       renderFinanzasGlobales();
     });
+  }
+  } catch (err) {
+    alert("ERROR CRÍTICO AL INICIAR: " + err.message + "\nLínea: " + err.lineNumber + "\n\nPasale captura completa de este cartel al programador.");
+    console.error(err);
   }
 }
 

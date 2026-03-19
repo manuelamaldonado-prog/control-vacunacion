@@ -391,7 +391,7 @@ let movimientoEditandoId = null;
 let movimientoEditandoTipo = null;
 let clienteEditandoId = null;
 let vacunacionEditandoId = null;
-let ultimaProvinciaCliente = "";
+let ultimaProvinciaCliente = "SANTIAGO DEL ESTERO";
 const filtros = {
   fechaDesde: "",
   fechaHasta: "",
@@ -1385,6 +1385,16 @@ function actualizarListas() {
       .map((v) => `<option value="${v.id}">${v.nombre}</option>`)
   );
   if (filtroDashVac) filtroDashVac.innerHTML = optionsDashVac.join("");
+  
+  const filtroCliGralVac = document.getElementById("filtro-cli-gral-vacunador");
+  if (filtroCliGralVac) {
+    filtroCliGralVac.innerHTML = ['<option value="">Cualquiera</option>'].concat(
+      vacunadores
+        .slice()
+        .sort((a, b) => (String(a.nombre || "")).localeCompare(String(b.nombre || ""), "es"))
+        .map((v) => `<option value="${v.id}">${v.nombre}</option>`)
+    ).join("");
+  }
 }
 
 function renderResumenGlobalVacunas() {
@@ -1500,7 +1510,6 @@ function renderProveedores() {
     `;
     tbody.appendChild(tr);
   });
-  actualizarFiltroProveedores();
 }
 
 function aplicarValoresPorDefectoCliente() {
@@ -1508,9 +1517,10 @@ function aplicarValoresPorDefectoCliente() {
   if (!form) return;
   if (!ultimaProvinciaCliente && clientes.length) {
     const ultimo = clientes[clientes.length - 1];
-    ultimaProvinciaCliente = ultimo.provincia || "";
+    ultimaProvinciaCliente = ultimo.provincia || "SANTIAGO DEL ESTERO";
   }
-  if (ultimaProvinciaCliente && !form.provincia.value) {
+  if (!ultimaProvinciaCliente) ultimaProvinciaCliente = "SANTIAGO DEL ESTERO";
+  if (!form.provincia.value) {
     form.provincia.value = ultimaProvinciaCliente;
   }
 }
@@ -1534,6 +1544,61 @@ function aplicarValoresPorDefectoVacunacion() {
   if (inputFecha && ultimaFechaVac) {
     inputFecha.value = ultimaFechaVac;
   }
+}
+
+function guardarEdicionInlineCliente(id, tr) {
+  const cli = clientes.find((c) => String(c.id) === String(id));
+  if (!cli) return;
+
+  const inRenspa = tr.querySelector(".in-renspa").value;
+  const inNombre = tr.querySelector(".in-nombre").value;
+  const inDoc = tr.querySelector(".in-doc").value;
+  const inEstab = tr.querySelector(".in-estab").value;
+  const inLoc = tr.querySelector(".in-loc").value;
+  const inDepto = tr.querySelector(".in-depto").value;
+  const inProv = tr.querySelector(".in-prov").value;
+  const inVacId = tr.querySelector(".in-vac").value;
+
+  cli.renspa = inRenspa;
+  cli.nombre = inNombre;
+  cli.documento = inDoc;
+  cli.establecimiento = inEstab;
+  cli.localidad = inLoc;
+  cli.departamento = inDepto;
+  cli.provincia = inProv;
+  cli.vacunadorId = inVacId ? Number(inVacId) : null;
+
+  guardarClientes();
+  actualizarListasClientes();
+  renderClientes();
+  alert("Cliente actualizado exitosamente.");
+}
+
+function iniciarEdicionInlineCliente(id, tr) {
+  const cli = clientes.find((c) => String(c.id) === String(id));
+  if (!cli) return;
+
+  const optVac = ['<option value="">Ninguno</option>'].concat(
+    vacunadores
+      .slice()
+      .sort((a, b) => (String(a.nombre || "")).localeCompare(String(b.nombre || ""), "es"))
+      .map((v) => `<option value="${v.id}" ${String(v.id) === String(cli.vacunadorId) ? "selected" : ""}>${v.nombre}</option>`)
+  ).join("");
+
+  tr.innerHTML = `
+    <td><input type="text" class="in-renspa" value="${(cli.renspa || "").replace(/"/g, '&quot;')}" style="width:100%"></td>
+    <td><input type="text" class="in-nombre" value="${(cli.nombre || "").replace(/"/g, '&quot;')}" style="width:100%"></td>
+    <td><input type="text" class="in-doc" value="${(cli.documento || "").replace(/"/g, '&quot;')}" style="width:100%"></td>
+    <td><input type="text" class="in-estab" value="${(cli.establecimiento || "").replace(/"/g, '&quot;')}" style="width:100%"></td>
+    <td><input type="text" class="in-loc" value="${(cli.localidad || "").replace(/"/g, '&quot;')}" style="width:100%"></td>
+    <td><input type="text" class="in-depto" value="${(cli.departamento || "").replace(/"/g, '&quot;')}" style="width:100%"></td>
+    <td><input type="text" class="in-prov" value="${(cli.provincia || "").replace(/"/g, '&quot;')}" style="width:100%"></td>
+    <td><select class="in-vac" style="width:100%">${optVac}</select></td>
+    <td style="text-align:center; white-space:nowrap; overflow:visible;">
+      <button type="button" data-action="save-cli-inline" data-id="${id}" class="icon-btn" title="Guardar">💾</button>
+      <button type="button" data-action="cancel-cli-inline" class="icon-btn icon-danger" title="Cancelar">❌</button>
+    </td>
+  `;
 }
 
 function renderClientes() {
@@ -2560,17 +2625,15 @@ function registrarEventos() {
         return;
       }
       if (boton.dataset.action === "edit-cli") {
-        const form = document.getElementById("form-cliente");
-        if (!form) return;
-        form.renspa.value = cli.renspa || "";
-        form.nombre.value = (cli.nombre || "").toUpperCase();
-        form.documento.value = cli.documento || "";
-        form.establecimiento.value = (cli.establecimiento || "").toUpperCase();
-        formCliente.localidad.value = (cli.localidad || "").toUpperCase();
-        formCliente.departamento.value = (cli.departamento || "").toUpperCase();
-        formCliente.provincia.value = cli.provincia || "";
-        if (formCliente.vacunadorId) formCliente.vacunadorId.value = cli.vacunadorId || "";
-        clienteEditandoId = id;
+        iniciarEdicionInlineCliente(id, tr);
+        return;
+      }
+      if (boton.dataset.action === "save-cli-inline") {
+        guardarEdicionInlineCliente(id, tr);
+        return;
+      }
+      if (boton.dataset.action === "cancel-cli-inline") {
+        renderClientes();
         return;
       }
       if (boton.dataset.action === "delete-cli") {
@@ -5526,119 +5589,130 @@ function renderInformeVacunadorDetalle() {
   }
 }
 
-function renderInformeClientesSinVac() {
-  const tbody = document.getElementById("tbody-informe-cli-sin-vac");
+function renderInformeCliGral() {
+  const tbody = document.getElementById("tbody-informe-cli-gral");
   if (!tbody) return;
 
-  const desde = document.getElementById("filtro-cli-sin-vac-desde")?.value;
-  const hasta = document.getElementById("filtro-cli-sin-vac-hasta")?.value;
-  const filtroRenspa = (document.getElementById("filtro-cli-sin-vac-renspa")?.value || "").trim().toLowerCase();
-  const filtroNombre = (document.getElementById("filtro-cli-sin-vac-nombre")?.value || "").trim().toLowerCase();
+  const fVacunado = document.getElementById("filtro-cli-gral-vacunado")?.value || "todos";
+  const fCampania = document.getElementById("filtro-cli-gral-campania")?.value || "";
+  const fAnio = document.getElementById("filtro-cli-gral-anio")?.value || "";
+  const fDesde = document.getElementById("filtro-cli-gral-desde")?.value || "";
+  const fHasta = document.getElementById("filtro-cli-gral-hasta")?.value || "";
+  const fActa = (document.getElementById("filtro-cli-gral-acta")?.value || "").trim().toLowerCase();
+  const fVacunadorId = document.getElementById("filtro-cli-gral-vacunador")?.value || "";
+  const fDepartamento = (document.getElementById("filtro-cli-gral-departamento")?.value || "").trim().toLowerCase();
+  const fCabezasMin = Number(document.getElementById("filtro-cli-gral-cabezas-min")?.value) || 0;
+  const valMax = document.getElementById("filtro-cli-gral-cabezas-max")?.value;
+  const fCabezasMax = valMax !== undefined && valMax !== "" ? Number(valMax) : null;
+  const fBusqueda = (document.getElementById("filtro-cli-gral-busqueda")?.value || "").trim().toLowerCase();
 
-  const vacsFiltradas = vacunaciones.filter(v => {
+  const vacsValidasContexto = vacunaciones.filter(v => {
     if (v.estado === "anulada") return false;
-    if (desde && v.fecha < desde) return false;
-    if (hasta && v.fecha > hasta) return false;
+    if (fCampania && v.periodo !== fCampania) return false;
+    if (fAnio && String(v.anio) !== String(fAnio)) return false;
+    if (fDesde && v.fecha < fDesde) return false;
+    if (fHasta && v.fecha > fHasta) return false;
     return true;
   });
 
-  const renspasVacunados = new Set(vacsFiltradas.map(v => (v.renspa || "").trim().toLowerCase()));
+  const statsPorCliente = new Map();
+  vacsValidasContexto.forEach(v => {
+    const renspa = (v.renspa || "").trim().toLowerCase();
+    if (!renspa) return;
+    if (!statsPorCliente.has(renspa)) {
+      statsPorCliente.set(renspa, { aftosaTot: 0, brucTot: 0, actas: new Set(), vacunadoresI: new Set() });
+    }
+    const st = statsPorCliente.get(renspa);
+    st.aftosaTot += Number(v.aftosa?.total) || 0;
+    st.brucTot += Number(v.brucelosis?.terneras) || 0;
+    if (v.acta) st.actas.add(String(v.acta).trim());
+    if (v.vacunadorId) st.vacunadoresI.add(String(v.vacunadorId));
+  });
 
-  const clientesSinVac = clientes.filter(c => {
-    const renspa = (c.renspa || "").trim().toLowerCase();
+  let totalCabezasAftosa = 0;
+  let matches = [];
+
+  clientes.forEach(c => {
+    const r = (c.renspa || "").trim().toLowerCase();
     const nombre = (c.nombre || "").trim().toLowerCase();
+    const dpto = (c.departamento || "").trim().toLowerCase();
+    
+    const st = statsPorCliente.get(r) || { aftosaTot: 0, brucTot: 0, actas: new Set(), vacunadoresI: new Set() };
+    const estaVacunado = statsPorCliente.has(r);
 
-    if (!renspa) return false;
-    if (renspasVacunados.has(renspa)) return false;
+    if (fVacunado === "si" && !estaVacunado) return;
+    if (fVacunado === "no" && estaVacunado) return;
+    if (fCabezasMin > 0 && st.aftosaTot < fCabezasMin) return;
+    if (fCabezasMax !== null && st.aftosaTot > fCabezasMax) return;
+    if (fDepartamento && !dpto.includes(fDepartamento)) return;
+    if (fBusqueda && !r.includes(fBusqueda) && !nombre.includes(fBusqueda)) return;
 
-    if (filtroRenspa && !renspa.includes(filtroRenspa)) return false;
-    if (filtroNombre && !nombre.includes(filtroNombre)) return false;
-
-    return true;
-  }).sort((a, b) => (String(a.nombre || "")).localeCompare(String(b.nombre || ""), "es"));
-
-  if (clientesSinVac.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" class="helper-text" style="text-align:center;">Todos los clientes tienen vacunación registrada en el período.</td></tr>';
-    return;
-  }
-
-  tbody.innerHTML = clientesSinVac.map(c => {
-    let vacunadorDeCliente = "Ninguno";
-    if (c.vacunadorId) {
-      const vacObj = vacunadores.find(v => v.id === c.vacunadorId);
-      if (vacObj) vacunadorDeCliente = vacObj.nombre;
-    }
-    return `
-      <tr>
-        <td>${c.renspa || ""}</td>
-        <td>${c.nombre || ""}</td>
-        <td>${c.documento || ""}</td>
-        <td>${c.establecimiento || ""}</td>
-        <td>${c.localidad || ""}</td>
-        <td>${c.departamento || ""}</td>
-        <td>${vacunadorDeCliente}</td>
-      </tr>
-    `;
-  }).join("");
-}
-
-function renderInformeClientesVac() {
-  const tbody = document.getElementById("tbody-informe-cli-vac");
-  if (!tbody) return;
-
-  const campania = document.getElementById("filtro-cli-vac-campania")?.value;
-  const anio = document.getElementById("filtro-cli-vac-anio")?.value;
-  const desde = document.getElementById("filtro-cli-vac-desde")?.value;
-  const hasta = document.getElementById("filtro-cli-vac-hasta")?.value;
-  const busqueda = (document.getElementById("filtro-cli-vac-busqueda")?.value || "").toLowerCase();
-
-  const vacsFiltradas = vacunaciones.filter(v => {
-    if (v.estado === "anulada") return false;
-    if (campania && v.periodo !== campania) return false;
-    if (anio && String(v.anio) !== String(anio)) return false;
-    if (desde && v.fecha < desde) return false;
-    if (hasta && v.fecha > hasta) return false;
-
-    if (busqueda) {
-      const matchRenspa = (v.renspa || "").toLowerCase().includes(busqueda);
-      const matchNombre = (v.nombreCli || "").toLowerCase().includes(busqueda);
-      if (!matchRenspa && !matchNombre) return false;
+    if (fActa) {
+      if (!estaVacunado) return;
+      const tieneActa = Array.from(st.actas).some(acta => acta.toLowerCase().includes(fActa));
+      if (!tieneActa) return;
     }
 
-    return true;
-  }).sort((a, b) => {
-    if (a.fecha === b.fecha) return (a.id || 0) - (b.id || 0);
-    return String(a.fecha).localeCompare(String(b.fecha));
+    if (fVacunadorId) {
+      const matchAsignado = String(c.vacunadorId) === String(fVacunadorId);
+      const matchPeriodos = st.vacunadoresI.has(String(fVacunadorId));
+      if (!matchAsignado && !matchPeriodos) return;
+    }
+
+    let stringActas = estaVacunado ? Array.from(st.actas).join(", ") : "-";
+    
+    let arrVacunadoresNombres = [];
+    st.vacunadoresI.forEach(vId => {
+      const vObj = vacunadores.find(x => String(x.id) === String(vId));
+      if (vObj) arrVacunadoresNombres.push(vObj.nombre);
+    });
+    if (arrVacunadoresNombres.length === 0 && c.vacunadorId) {
+      const vObj = vacunadores.find(x => String(x.id) === String(c.vacunadorId));
+      if (vObj) arrVacunadoresNombres.push(`*${vObj.nombre}*`); // Indicativo de que es el asignado nominal
+    }
+    const stringVacs = arrVacunadoresNombres.length > 0 ? arrVacunadoresNombres.join(", ") : "Ninguno";
+
+    if (estaVacunado) totalCabezasAftosa += st.aftosaTot;
+
+    matches.push({
+      renspaHtml: c.renspa || "-",
+      cuit: c.documento || "-",
+      nombre: c.nombre || "-",
+      estab: c.establecimiento || "-",
+      dpto: c.departamento || "-",
+      aftosa: estaVacunado ? st.aftosaTot : "No Vacunado",
+      bruc: estaVacunado ? st.brucTot : "-",
+      actas: stringActas,
+      vacunadores: stringVacs,
+      rawRenspa: r,
+      isVacunado: estaVacunado
+    });
   });
 
-  if (vacsFiltradas.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="8" class="helper-text" style="text-align:center;">No hay clientes vacunados que coincidan con los filtros.</td></tr>';
+  const lblTotalCabezas = document.getElementById("gral-cli-total-cabezas");
+  const lblTotalReg = document.getElementById("gral-cli-total-reg");
+  if (lblTotalReg) lblTotalReg.textContent = matches.length;
+  if (lblTotalCabezas) lblTotalCabezas.textContent = totalCabezasAftosa;
+
+  if (matches.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" class="helper-text" style="text-align:center;">No se encontraron clientes con esos filtros.</td></tr>';
     return;
   }
 
-  tbody.innerHTML = vacsFiltradas.map(v => {
-    const aftTotal = v.aftosa && typeof v.aftosa.total === "number" ? v.aftosa.total : 0;
-    const bruTerneras = v.brucelosis && typeof v.brucelosis.terneras === "number" ? v.brucelosis.terneras : 0;
-    // Intentar buscar el cliente para traer el establecimiento si no estuviera en vacunacion
-    let establecimiento = v.establecimiento || "-";
-    if (establecimiento === "-") {
-      const cli = clientes.find(c => (c.renspa || "").trim().toLowerCase() === (v.renspa || "").trim().toLowerCase());
-      if (cli && cli.establecimiento) establecimiento = cli.establecimiento;
-    }
+  matches.sort((a,b) => a.rawRenspa.localeCompare(b.rawRenspa, "es"));
 
-    return `
-      <tr>
-        <td>${v.fecha || ""}</td>
-        <td>${v.acta || ""}</td>
-        <td>${v.renspa || ""}</td>
-        <td>${v.nombreCli || ""}</td>
-        <td>${establecimiento}</td>
-        <td>${v.vacunadorNombre || ""}</td>
-        <td>${aftTotal}</td>
-        <td>${bruTerneras}</td>
-      </tr>
-    `;
-  }).join("");
+  tbody.innerHTML = matches.map(m => `
+    <tr>
+      <td>${m.renspaHtml} ${m.cuit !== "-" ? "<br><small>"+m.cuit+"</small>" : ""}</td>
+      <td><strong>${m.nombre}</strong></td>
+      <td>${m.estab}</td>
+      <td>${m.dpto}</td>
+      <td style="color:${m.isVacunado ? '#2e7d32' : '#d32f2f'}; font-weight:bold;">${m.aftosa}</td>
+      <td>${m.bruc}</td>
+      <td><small>${m.actas}</small></td>
+      <td><small>${m.vacunadores}</small></td>
+    </tr>
+  `).join("");
 }
 
 function renderFinanzasGlobales() {
@@ -6603,15 +6677,11 @@ function registrarEventosActas() {
   document.getElementById("filtro-ent-vacunador")?.addEventListener("change", renderActasEntrega);
 
   // Informe Clientes
-  document.getElementById("btn-generar-cli-sin-vac")?.addEventListener("click", renderInformeClientesSinVac);
-  document.getElementById("filtro-cli-sin-vac-renspa")?.addEventListener("input", renderInformeClientesSinVac);
-  document.getElementById("filtro-cli-sin-vac-nombre")?.addEventListener("input", renderInformeClientesSinVac);
-
-  const inputAnioVac = document.getElementById("filtro-cli-vac-anio");
+  const inputAnioVac = document.getElementById("filtro-cli-gral-anio");
   if (inputAnioVac) {
     inputAnioVac.value = new Date().getFullYear();
   }
-  document.getElementById("btn-generar-cli-vac")?.addEventListener("click", renderInformeClientesVac);
+  document.getElementById("btn-generar-cli-gral")?.addEventListener("click", renderInformeCliGral);
 
   // Informe Finanzas
   document.getElementById("btn-generar-finanzas")?.addEventListener("click", renderFinanzasGlobales);
@@ -6890,6 +6960,7 @@ function quitarLoteCompra(index) {
 }
 
 function initialize() {
+  try {
   cargarDesdeStorage();
 
   if (vacunadores.length > 0) {
@@ -6976,6 +7047,10 @@ function initialize() {
       });
       renderFinanzasGlobales();
     });
+  }
+  } catch (err) {
+    alert("ERROR CRÍTICO AL INICIAR: " + err.message + "\nLínea: " + err.lineNumber + "\n\nPasale captura completa de este cartel al programador.");
+    console.error(err);
   }
 }
 
